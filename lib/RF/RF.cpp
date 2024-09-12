@@ -2,10 +2,11 @@
 
 RFReceiver* RFReceiver::instance = nullptr;
 
-RFReceiver::RFReceiver(uint16_t speed, uint8_t rxPin)
-    : _speed(speed), _rxPin(rxPin)
+RFReceiver::RFReceiver(uint16_t speed, uint8_t rxPin, uint16_t samples)
+    : _speed(speed), _rxPin(rxPin), _samples(samples)
 {
     disable();
+    instance = this;
 }
 
 bool RFReceiver::init()
@@ -26,7 +27,7 @@ const int microsecPerSec = 1000000;
 void RFReceiver::timerSetup()
 {
     const int ticksPerBit = microsecPerSec / _speed;
-    const int ticksPerSample = ticksPerBit / samples;
+    const int ticksPerSample = ticksPerBit / _samples;
 
 
     timer = timerBegin(0, divider, true);

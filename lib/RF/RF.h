@@ -1,7 +1,6 @@
 #include <Arduino.h>
 const int MAX_MESSAGE_LEN = 30;
 // number of samples per bit
-const uint16_t samples = 8;
 
 class RFReceiver
 {
@@ -13,20 +12,20 @@ private:
 
 public:
 
-    RFReceiver(uint16_t speed = 2000, uint8_t rxPin = 11);
+    RFReceiver(uint16_t speed = 2000, uint8_t rxPin = 11, uint16_t samples = 8);
 
     // Initialise the driver and the transport hardware.
     bool init();
 
     // True when a new message is available
-    bool available();
+    virtual bool available() = 0;
 
     
     // Ram loaded function that will copy the message to the buffer
     IRAM_ATTR virtual bool receive(uint8_t* buf, size_t len);
 
 
-    size_t maxMessageLength();
+    virtual size_t maxMessageLength() = 0;
 
 
     uint16_t speed() { return _speed; }
@@ -46,6 +45,8 @@ public:
 
 protected:
 
+    const uint16_t _samples;
+
     virtual void registerSample(bool sample) = 0;
     virtual void synchronize() = 0;
     virtual bool bitTransition() = 0;
@@ -64,8 +65,8 @@ protected:
     IRAM_ATTR void handleTimerInterrupt();
 
 
-    uint16_t _speed;
-    uint8_t _rxPin;
+    const uint16_t _speed;
+    const uint8_t _rxPin;
 
     bool _enabled = false;
 };
