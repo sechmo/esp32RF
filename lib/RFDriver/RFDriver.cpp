@@ -8,6 +8,43 @@
 
 
 
+bool RH_ASK::waitPacketSent()
+{
+    while (_mode == RHModeTx)
+	yield(); // Wait for any previous transmit to finish
+    return true;
+}
+
+
+bool RH_ASK::waitCAD()
+{
+    if (!_cad_timeout)
+	return true;
+
+    // Wait for any channel activity to finish or timeout
+    // Sophisticated DCF function...
+    // DCF : BackoffTime = random() x aSlotTime
+    // 100 - 1000 ms
+    // 10 sec timeout
+    unsigned long t = millis();
+    while (isChannelActive())
+    {
+         if (millis() - t > _cad_timeout) 
+	     return false;
+         delay(random(1, 10) * 100); // Should these values be configurable? Macros?
+    }
+
+    return true;
+
+}
+
+
+// subclasses are expected to override if CAD is available for that radio
+bool RH_ASK::isChannelActive()
+{
+    return false;
+}
+
 // Michael Cain
 DRAM_ATTR hw_timer_t * timer;
 //jPerotto Non-constant static data from ESP32 https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/general-notes.html#dram-data-ram
@@ -46,6 +83,7 @@ RH_ASK::RH_ASK(uint16_t speed, uint8_t rxPin, uint8_t txPin, uint8_t pttPin, boo
     _txPin(txPin),
     _pttPin(pttPin),
     _rxInverted(false),
+    _cad_timeout(0),
     _pttInverted(pttInverted)
 {
     // Initialise the first 8 nibbles of the tx buffer to be the stanRCdard
@@ -57,8 +95,6 @@ RH_ASK::RH_ASK(uint16_t speed, uint8_t rxPin, uint8_t txPin, uint8_t pttPin, boo
 
 bool RH_ASK::init()
 {
-    if (!RHGenericDriver::init())
-	return false;
     thisASKDriver = this;
 
     // Set up digital IO pins for arduino
@@ -298,13 +334,9 @@ void RH_ASK::validateRxBuf()
     _rxHeaderFrom  = _rxBuf[2];
     _rxHeaderId    = _rxBuf[3];
     _rxHeaderFlags = _rxBuf[4];
-    if (_promiscuous ||
-	_rxHeaderTo == _thisAddress ||
-	_rxHeaderTo == RH_BROADCAST_ADDRESS)
-    {
+
 	_rxGood++;
 	_rxBufValid = true;
-    }
 }
 
 void RH_INTERRUPT_ATTR RH_ASK::receiveTimer()

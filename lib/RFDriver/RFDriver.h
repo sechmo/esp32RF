@@ -6,7 +6,10 @@
 #ifndef RH_ASK_h
 #define RH_ASK_h
 
-#include <RFGenericDriver.h>
+#include <Arduino.h>
+
+#define RH_INTERRUPT_ATTR IRAM_ATTR
+// #include <RFGenericDriver.h>
 
 // Maximum message length (including the headers, byte count and FCS) we are willing to support
 // This is pretty arbitrary
@@ -268,9 +271,19 @@
 /// RH_ASK driver(2000, PA3, PA4);
 /// \endcode
 /// and connect the serial to pins PA3 and PA4
-class RH_ASK : public RHGenericDriver
+class RH_ASK //: public RHGenericDriver
 {
 public:
+
+    typedef enum
+    {
+	RHModeInitialising = 0, ///< Transport is initialising. Initial default value until init() is called..
+	RHModeSleep,            ///< Transport hardware is in low power sleep mode (if supported)
+	RHModeIdle,             ///< Transport is idle.
+	RHModeTx,               ///< Transport is in the process of transmitting a message.
+	RHModeRx,               ///< Transport is in the process of receiving a message.
+	RHModeCad               ///< Transport is in the process of detecting channel activity (if supported)
+    } RHMode;
 
     /// Constructor.
     /// At present only one instance of RH_ASK per sketch is supported.
@@ -280,6 +293,15 @@ public:
     /// \param[in] pttPin The pin that is connected to the transmitter controller. It will be set HIGH to enable the transmitter (unless pttInverted is true).
     /// \param[in] pttInverted true if you desire the pttin to be inverted so that LOW wil enable the transmitter.
     RH_ASK(uint16_t speed = 2000, uint8_t rxPin = 11, uint8_t txPin = 12, uint8_t pttPin = 10, bool pttInverted = false);
+
+
+    virtual bool            waitPacketSent();
+
+    virtual bool            waitCAD();
+
+    virtual bool            isChannelActive();
+
+
 
     /// Initialise the Driver transport hardware and software.
     /// Make sure the Driver is properly configured before calling init().
@@ -343,6 +365,40 @@ public:
 #endif
 
 protected:
+
+    volatile uint16_t   _rxBad;
+    volatile uint16_t   _rxGood;
+
+    volatile uint16_t   _txGood;
+
+    volatile RHMode     _mode;
+    unsigned int        _cad_timeout;
+
+
+    /// TO header in the last received mesasge
+    volatile uint8_t    _rxHeaderTo;
+
+    /// FROM header in the last received mesasge
+    volatile uint8_t    _rxHeaderFrom;
+
+    /// ID header in the last received mesasge
+    volatile uint8_t    _rxHeaderId;
+
+    /// FLAGS header in the last received mesasge
+    volatile uint8_t    _rxHeaderFlags;
+
+    /// TO header to send in all messages
+    uint8_t             _txHeaderTo;
+
+    /// FROM header to send in all messages
+    uint8_t             _txHeaderFrom;
+
+    /// ID header to send in all messages
+    uint8_t             _txHeaderId;
+
+    /// FLAGS header to send in all messages
+    uint8_t             _txHeaderFlags;
+
     /// Helper function for calculating timer ticks
     uint8_t         timerCalc(uint16_t speed, uint16_t max_ticks, uint16_t *nticks);
 
