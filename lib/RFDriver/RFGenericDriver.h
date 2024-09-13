@@ -6,7 +6,7 @@
 #ifndef RHGenericDriver_h
 #define RHGenericDriver_h
 
-#include <RadioHead.h>
+#include <RadioDriver.h>
 
 // Defines bits of the FLAGS header reserved for use by the RadioHead library and 
 // the flags available for use by applications
@@ -147,7 +147,7 @@ public:
     virtual bool            waitCAD();
 
     /// Sets the Channel Activity Detection timeout in milliseconds to be used by waitCAD().
-    /// The default is 0, which means do not wait for CAD detection.
+    /// The default is 0, which means do no.h>t wait for CAD detection.
     /// CAD detection depends on support for isChannelActive() by your particular radio.
     void setCADTimeout(unsigned long cad_timeout);
 

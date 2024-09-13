@@ -3,7 +3,7 @@
 // Copyright (C) 2014 Mike McCauley
 // $Id: RH_ASK.cpp,v 1.32 2020/08/04 09:02:14 mikem Exp $
 
-#include <RH_ASK.h>
+#include <RFDriver.h>
 #include <RHCRC.h>
 
 #ifndef __SAMD51__

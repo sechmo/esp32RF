@@ -3,7 +3,7 @@
 // Copyright (C) 2014 Mike McCauley
 // $Id: RHGenericDriver.cpp,v 1.24 2020/01/07 23:35:02 mikem Exp $
 
-#include <RHGenericDriver.h>
+#include <RFGenericDriver.h>
 
 RHGenericDriver::RHGenericDriver()
     :
@@ -23,55 +23,6 @@ RHGenericDriver::RHGenericDriver()
 bool RHGenericDriver::init()
 {
     return true;
-}
-
-// Blocks until a valid message is received
-void RHGenericDriver::waitAvailable(uint16_t polldelay)
-{
-    while (!available())
-      {
-	YIELD;
-	if (polldelay)
-	  delay(polldelay);
-      }
-}
-
-// Blocks until a valid message is received or timeout expires
-// Return true if there is a message available
-// Works correctly even on millis() rollover
-bool RHGenericDriver::waitAvailableTimeout(uint16_t timeout, uint16_t polldelay)
-{
-    unsigned long starttime = millis();
-    while ((millis() - starttime) < timeout)
-    {
-        if (available())
-	{
-           return true;
-	}
-	YIELD;
-	if (polldelay)
-	  delay(polldelay);
-    }
-    return false;
-}
-
-bool RHGenericDriver::waitPacketSent()
-{
-    while (_mode == RHModeTx)
-	YIELD; // Wait for any previous transmit to finish
-    return true;
-}
-
-bool RHGenericDriver::waitPacketSent(uint16_t timeout)
-{
-    unsigned long starttime = millis();
-    while ((millis() - starttime) < timeout)
-    {
-        if (_mode != RHModeTx) // Any previous transmit finished?
-           return true;
-	YIELD;
-    }
-    return false;
 }
 
 // Wait until no channel activity detected or timeout
