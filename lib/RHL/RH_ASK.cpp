@@ -564,6 +564,9 @@ void RH_ASK::timerSetup()
     timerAlarm(timer, 1, true, 0);
  #else
     // Prior to version 3
+
+    Serial.printf("tickes per sample %d\n", 1000000 / _speed / 8);
+
     timer = timerBegin(0, 80, true); // Alarm value will be in in us
     timerAttachInterrupt(timer, &esp32_timer_interrupt_handler, true);
     timerAlarmWrite(timer, 1000000 / _speed / 8, true);
@@ -960,8 +963,21 @@ void RH_INTERRUPT_ATTR RH_ASK::receiveTimer()
     if (rxSample)
 	_rxIntegrator++;
 
+    altbitcounter++;
+
+    cacheCount++;
+    if (cacheCount > sizeof(lastChangeProgresses) - 1) {
+        cacheCount = 0;
+    }
+    lastChangeProgresses[cacheCount] = altbitcounter; // _rxPllRamp;
+
+    if (altbitcounter/8 > 12) {
+        setModeIdle();
+    }
+
     if (rxSample != _rxLastSample)
     {
+
 	// Transition, advance if ramp > 80, retard if < 80
 	_rxPllRamp += ((_rxPllRamp < RH_ASK_RAMP_TRANSITION) 
 			   ? RH_ASK_RAMP_INC_RETARD 
@@ -1010,6 +1026,9 @@ void RH_INTERRUPT_ATTR RH_ASK::receiveTimer()
 		    // Check it for sensibility. It cant be less than 7, since it
 		    // includes the byte count itself, the 4 byte header and the 2 byte FCS
 		    _rxCount = this_byte;
+
+            // setModeIdle();
+            // return;
 		    if (_rxCount < 7 || _rxCount > RH_ASK_MAX_PAYLOAD_LEN)
 		    {
 			// Stupid message length, drop the whole thing
@@ -1037,6 +1056,8 @@ void RH_INTERRUPT_ATTR RH_ASK::receiveTimer()
 	    _rxActive = true;
 	    _rxBitCount = 0;
 	    _rxBufLen = 0;
+
+        setModeIdle();
 	}
     }
 }

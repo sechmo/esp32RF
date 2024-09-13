@@ -271,6 +271,14 @@
 class RH_ASK : public RHGenericDriver
 {
 public:
+
+
+    volatile uint8_t lastChangeProgresses[100] = {1, 0};
+    volatile uint8_t cacheCount = 0;
+    volatile uint8_t altbitcounter = 0;
+
+    bool enabled() { return _mode != RHModeIdle; }
+
     /// Constructor.
     /// At present only one instance of RH_ASK per sketch is supported.
     /// \param[in] speed The desired bit rate in bits per second

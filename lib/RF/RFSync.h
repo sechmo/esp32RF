@@ -3,6 +3,15 @@
 class RFSync : public RFReceiver
 {
 
+public: 
+    RFSync(uint16_t speed = 2000, uint8_t rxPin = 11, uint16_t samples = 8,size_t rxBufferSize = 67, uint16_t startSymbol = 0xb38, uint8_t bitPeriodLength = 160, uint8_t syncBias = 9);
+
+
+    virtual bool available() override;
+    IRAM_ATTR virtual bool receive(uint8_t* buf, size_t *len) override;
+
+    virtual size_t maxMessageLength() override;
+
 private:
 
     const uint8_t _bitPeriodLength;
@@ -11,7 +20,7 @@ private:
     const uint8_t _bitPeriodRetard;
     const uint8_t _bitPeriodTransition;
 
-    const uint8_t _startSymbol;
+    const uint16_t _startSymbol;
 
     const size_t _rxBufferSize;
     uint8_t* _rxBuffer;
@@ -29,16 +38,17 @@ private:
 
     volatile uint8_t _rxActive;
 
-    volatile uint8_t _rxLast12EncodedBits; 
+    volatile uint16_t _rxLast12EncodedBits; 
     // how many bits of _rxLast12EncodedBits we have set so far
     volatile uint8_t _rxEncodedBitCount;
 
+    IRAM_ATTR uint8_t symbol6to4(uint8_t symbol);
 
 protected:
 
-    void registerSample(bool sample) override;
-    void synchronize() override;
-    bool bitTransition() override;
-    void processBit() override;
+    void IRAM_ATTR registerSample(bool sample) override;
+    void IRAM_ATTR synchronize() override;
+    bool IRAM_ATTR bitTransition() override;
+    void IRAM_ATTR processBit() override;
 
 };
