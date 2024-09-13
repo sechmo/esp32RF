@@ -8,9 +8,6 @@
 RHGenericDriver::RHGenericDriver()
     :
     _mode(RHModeInitialising),
-    _thisAddress(RH_BROADCAST_ADDRESS),
-    _txHeaderTo(RH_BROADCAST_ADDRESS),
-    _txHeaderFrom(RH_BROADCAST_ADDRESS),
     _txHeaderId(0),
     _txHeaderFlags(0),
     _rxBad(0),
@@ -25,7 +22,15 @@ bool RHGenericDriver::init()
     return true;
 }
 
-// Wait until no channel activity detected or timeout
+
+bool RHGenericDriver::waitPacketSent()
+{
+    while (_mode == RHModeTx)
+	yield(); // Wait for any previous transmit to finish
+    return true;
+}
+
+
 bool RHGenericDriver::waitCAD()
 {
     if (!_cad_timeout)
@@ -41,11 +46,7 @@ bool RHGenericDriver::waitCAD()
     {
          if (millis() - t > _cad_timeout) 
 	     return false;
-#if (RH_PLATFORM == RH_PLATFORM_STM32) // stdlib on STMF103 gets confused if random is redefined
-	 delay(_random(1, 10) * 100);
-#else
          delay(random(1, 10) * 100); // Should these values be configurable? Macros?
-#endif
     }
 
     return true;

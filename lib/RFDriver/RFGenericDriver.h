@@ -6,7 +6,13 @@
 #ifndef RHGenericDriver_h
 #define RHGenericDriver_h
 
-#include <RadioDriver.h>
+// #include <RadioDriver.h>
+#include <Arduino.h>
+
+// This is the address that indicates a broadcast
+#define RH_BROADCAST_ADDRESS 0xff
+
+#define RH_INTERRUPT_ATTR IRAM_ATTR
 
 // Defines bits of the FLAGS header reserved for use by the RadioHead library and 
 // the flags available for use by applications
@@ -110,7 +116,7 @@ public:
   /// \param[in] polldelay Time between polling available() in milliseconds. This can be useful
   /// in multitaking environment like Linux to prevent waitAvailableTimeout
   /// using all the CPU while polling for receiver activity
-    virtual void            waitAvailable(uint16_t polldelay = 0);
+    // virtual void            waitAvailable(uint16_t polldelay = 0);
 
     /// Blocks until the transmitter 
     /// is no longer transmitting.
@@ -120,7 +126,7 @@ public:
     /// or until the timeout occuers, whichever happens first
     /// \param[in] timeout Maximum time to wait in milliseconds.
     /// \return true if the radio completed transmission within the timeout period. False if it timed out.
-    virtual bool            waitPacketSent(uint16_t timeout);
+    // virtual bool            waitPacketSent(uint16_t timeout);
 
     /// Starts the receiver and blocks until a received message is available or a timeout.
   /// Default implementation calls available() repeatedly until it returns true;
@@ -129,7 +135,7 @@ public:
   /// in multitaking environment like Linux to prevent waitAvailableTimeout
   /// using all the CPU while polling for receiver activity
     /// \return true if a message is available
-  virtual bool            waitAvailableTimeout(uint16_t timeout, uint16_t polldelay = 0);
+  // virtual bool            waitAvailableTimeout(uint16_t timeout, uint16_t polldelay = 0);
 
     // Bent G Christensen (bentor@gmail.com), 08/15/2016
     /// Channel Activity Detection (CAD).

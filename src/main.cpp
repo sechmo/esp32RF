@@ -19,8 +19,8 @@ const int speed = 2000;
 
 #else
 
-#include <RH_ASK.h>
-#include <SPI.h> // Not actually used but needed to compile
+// #include <RH_ASK.h>
+// #include <SPI.h> // Not actually used but needed to compile
 #endif
  
 RH_ASK driver(speed, inputPin, outputPin, 0); // ESP8266 or ESP32: do not use pin 11 or 2

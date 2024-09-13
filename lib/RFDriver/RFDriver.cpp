@@ -4,7 +4,7 @@
 // $Id: RH_ASK.cpp,v 1.32 2020/08/04 09:02:14 mikem Exp $
 
 #include <RFDriver.h>
-#include <RHCRC.h>
+#include <RFCRC.h>
 
 
 
