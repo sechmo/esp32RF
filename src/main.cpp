@@ -239,31 +239,7 @@ void loop()
 {
     if (isReceiver)
     {
-        if (driver.enabled()) {
-            loopReceiver();
-        }
-        else {
-            delay(1000);
-            static int count = 0;
-            count++;
-            if (count < 10) {
-                // Serial.print("testCount Bin: ");
-                // Serial.println(receiver.testCount, BIN);
-                // Serial.print("testCount Dec: ");
-                // Serial.println(receiver.testCount);
-                // Serial.print("testCount Hex: ");
-                // Serial.println(receiver.testCount, HEX);
-                for (int i = 0; i < sizeof(driver.lastChangeProgresses); i++)
-                {
-                    Serial.print("lastChangeProgresses[");
-                    Serial.print(i);
-                    Serial.print("]: ");
-                    Serial.println(driver.lastChangeProgresses[i]);
-                }
-            }
-        }
-
-        // loopReceiver();
+        loopReceiver();
     }
     else
     {

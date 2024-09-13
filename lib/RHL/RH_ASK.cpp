@@ -564,9 +564,6 @@ void RH_ASK::timerSetup()
     timerAlarm(timer, 1, true, 0);
  #else
     // Prior to version 3
-
-    Serial.printf("tickes per sample %d\n", 1000000 / _speed / 8);
-
     timer = timerBegin(0, 80, true); // Alarm value will be in in us
     timerAttachInterrupt(timer, &esp32_timer_interrupt_handler, true);
     timerAlarmWrite(timer, 1000000 / _speed / 8, true);
@@ -962,18 +959,6 @@ void RH_INTERRUPT_ATTR RH_ASK::receiveTimer()
     // Integrate each sample
     if (rxSample)
 	_rxIntegrator++;
-
-    altbitcounter++;
-
-    cacheCount++;
-    if (cacheCount > sizeof(lastChangeProgresses) - 1) {
-        cacheCount = 0;
-    }
-    lastChangeProgresses[cacheCount] = altbitcounter; // _rxPllRamp;
-
-    if (altbitcounter/8 > 12) {
-        setModeIdle();
-    }
 
     if (rxSample != _rxLastSample)
     {
