@@ -5,7 +5,7 @@
 // Implements a simplex (one-way) receiver with an Rx-B1 module
 // Tested on Arduino Mega, Duemilanova, Uno, Due, Teensy, ESP-12
 
-#include <Arduino.h> 
+#include <Arduino.h>
 
 const uint8_t inputPin = GPIO_NUM_33;
 const uint8_t outputPin = GPIO_NUM_19;
@@ -22,29 +22,33 @@ const int speed = 2000;
 // #include <RH_ASK.h>
 // #include <SPI.h> // Not actually used but needed to compile
 #endif
- 
+
 RH_ASK driver(speed, inputPin, outputPin, 0); // ESP8266 or ESP32: do not use pin 11 or 2
- 
+
+uint8_t *buf;
+uint8_t buflen;
+
 void setup()
 {
-    Serial.begin(9600);   // Debugging only
+    Serial.begin(9600); // Debugging only
     if (!driver.init())
-         Serial.println("init failed");
+        Serial.println("init failed");
     pinMode(ledPin, OUTPUT);
 
     Serial.println("setup done");
 
-    }
- 
+    buflen = driver.maxMessageLength();
+
+    buf = new uint8_t[buflen];
+}
+
 void loopReceiver()
 {
-    uint8_t buf[maxMsgLen];
-    uint8_t buflen = sizeof(buf);
- 
+
     if (driver.recv(buf, &buflen)) // Non-blocking
     {
         int i;
- 
+
         // Message with a good checksum received, dump it.
         Serial.print("Got: ");
         for (int i = 0; i < buflen; i++)
@@ -60,11 +64,9 @@ void loopReceiver()
     }
 }
 
-
 void loopTransmitter()
 {
 
-    
     const char *msg = "hello";
     driver.send((uint8_t *)msg, strlen(msg));
     driver.waitPacketSent();
@@ -74,7 +76,6 @@ void loopTransmitter()
     delay(200);
     digitalWrite(ledPin, LOW);
     delay(200);
-
 
     // digitalWrite(ledPin, LOW);
     // delay(2000);
@@ -93,7 +94,6 @@ void loopTransmitter()
     // }
 }
 
-
 void loop()
 {
     if (isReceiver)
@@ -105,4 +105,3 @@ void loop()
         loopTransmitter();
     }
 }
-

@@ -70,14 +70,21 @@ RH_DRAM_ATTR static uint8_t symbols[] =
 // This is the value of the start symbol after 6-bit conversion and nybble swapping
 // #define startSymbol 0xb38
 
-RH_ASK::RH_ASK(uint16_t speed, uint8_t rxPin, uint8_t txPin, uint8_t pttPin, bool pttInverted)
+RH_ASK::RH_ASK(
+    uint16_t speed,
+    uint8_t rxPin,
+    uint8_t txPin,
+    uint8_t pttPin,
+    uint8_t maxPayloadLen,
+    uint8_t rxSamples,
+    uint8_t rxRampLen,
+    uint8_t rampAdjust
+    )
     : _speed(speed),
       _rxPin(rxPin),
       _txPin(txPin),
       _pttPin(pttPin),
-      _rxInverted(false),
       _cad_timeout(0),
-      _pttInverted(pttInverted),
       _mode(RHModeInitialising),
       _rxBad(0),
       _rxGood(0),
@@ -85,8 +92,18 @@ RH_ASK::RH_ASK(uint16_t speed, uint8_t rxPin, uint8_t txPin, uint8_t pttPin, boo
       _rxBufValid(false),
       _rxBufFull(false),
       _rxBufLen(0),
-      _rxIntegrator(0)
-
+      _rxIntegrator(0),
+      maxPayloadLen(maxPayloadLen),
+      maxMsgLen(maxPayloadLen - headerLen - 3),
+      _rxBuf(new uint8_t[maxPayloadLen]),
+      _txBuf(new uint8_t[maxPayloadLen * 2 + preambleLen]),
+      rxSamples(rxSamples),
+      rxRampLen(rxRampLen),
+      rampTransition(rxRampLen / 2),
+      rampInc(rxRampLen / rxSamples),
+      rampAdjust(rampAdjust),
+      rampIncRetard(rampInc - rampAdjust),
+      rampIncAdvance(rampInc + rampAdjust)
 {
     // Initialise the first 8 nibbles of the tx buffer to be the stanRCdard
     // preamble. We will append messages after that. 0x38, 0x2c is the start symbol before
@@ -272,7 +289,7 @@ bool RH_INTERRUPT_ATTR RH_ASK::readRx()
 {
     bool value;
     value = digitalRead(_rxPin);
-    return value ^ _rxInverted;
+    return value;
 }
 
 // Write the TX output pin, taking into account platform type.
@@ -284,7 +301,7 @@ void RH_INTERRUPT_ATTR RH_ASK::writeTx(bool value)
 // Write the PTT output pin, taking into account platform type and inversion.
 void RH_INTERRUPT_ATTR RH_ASK::writePtt(bool value)
 {
-    digitalWrite(_pttPin, value ^ _pttInverted);
+    digitalWrite(_pttPin, value);
 }
 
 uint8_t RH_ASK::maxMessageLength()
