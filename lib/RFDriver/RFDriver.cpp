@@ -91,18 +91,11 @@ RadioDriver::RadioDriver(
       _rxBufValid(false),
       _rxBufFull(false),
       _rxBufLen(0),
-      _rxIntegrator(0),
+      rxSamples(rxSamples),
       maxPayloadLen(maxPayloadLen),
       maxMsgLen(maxPayloadLen - headerLen - 3),
       _rxBuf(new uint8_t[maxPayloadLen]),
-      _txBuf(new uint8_t[maxPayloadLen * 2 + preambleLen]),
-      rxSamples(rxSamples),
-      rxRampLen(rxRampLen),
-      rampTransition(rxRampLen / 2),
-      rampInc(rxRampLen / rxSamples),
-      rampAdjust(rampAdjust),
-      rampIncRetard(rampInc - rampAdjust),
-      rampIncAdvance(rampInc + rampAdjust)
+      _txBuf(new uint8_t[maxPayloadLen * 2 + preambleLen])
 {
     // Initialise the first 8 nibbles of the tx buffer to be the stanRCdard
     // preamble. We will append messages after that. 0x38, 0x2c is the start symbol before
@@ -186,38 +179,6 @@ void RadioDriver::setModeTx()
     }
 }
 
-// Call this often
-bool RadioDriver::available()
-{
-    if (_mode == RHModeTx)
-        return false;
-    setModeRx();
-    if (_rxBufFull)
-    {
-        validateRxBuf();
-        _rxBufFull = false;
-    }
-    return _rxBufValid;
-}
-
-bool RH_INTERRUPT_ATTR RadioDriver::recv(uint8_t *buf, uint8_t *len)
-{
-    if (!available())
-        return false;
-
-    if (buf && len)
-    {
-        // Skip the length and 4 headers that are at the beginning of the rxBuf
-        // and drop the trailing 2 bytes of FCS
-        uint8_t message_len = _rxBufLen - headerLen - 3;
-        if (*len > message_len)
-            *len = message_len;
-        memcpy(buf, _rxBuf + headerLen + 1, *len);
-    }
-    _rxBufValid = false; // Got the most recent message, delete it
-                         //    printBuffer("recv:", buf, *len);
-    return true;
-}
 
 // Caution: this may block
 bool RadioDriver::send(const uint8_t *data, uint8_t len)

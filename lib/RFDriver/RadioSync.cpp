@@ -1,6 +1,5 @@
 #include <RadioSync.h>
 
-
 RadioSync::RadioSync(
     uint16_t speed,
     uint8_t rxPin,
@@ -9,10 +8,52 @@ RadioSync::RadioSync(
     uint8_t maxPayloadLen,
     uint8_t rxSamples,
     uint8_t rxRampLen,
-    uint8_t rampAdjust
-    )
-    : RadioDriver(speed, rxPin, txPin, pttPin, maxPayloadLen, rxSamples, rxRampLen, rampAdjust)
+    uint8_t rampAdjust)
+    : RadioDriver(speed, rxPin, txPin, pttPin, maxPayloadLen, rxSamples, rxRampLen, rampAdjust),
+      _rxIntegrator(0),
+      rxRampLen(rxRampLen),
+      rampTransition(rxRampLen / 2),
+      rampInc(rxRampLen / rxSamples),
+      rampAdjust(rampAdjust),
+      rampIncRetard(rampInc - rampAdjust),
+      rampIncAdvance(rampInc + rampAdjust)
 {
+}
+
+
+// Call this often
+bool RadioSync::available()
+{
+    if (_mode == RHModeTx)
+        return false;
+    setModeRx();
+    if (_rxBufFull)
+    {
+        validateRxBuf();
+        _rxBufFull = false;
+    }
+    return _rxBufValid;
+}
+
+
+
+bool RH_INTERRUPT_ATTR RadioSync::recv(uint8_t *buf, uint8_t *len)
+{
+    if (!available())
+        return false;
+
+    if (buf && len)
+    {
+        // Skip the length and 4 headers that are at the beginning of the rxBuf
+        // and drop the trailing 2 bytes of FCS
+        uint8_t message_len = _rxBufLen - headerLen - 3;
+        if (*len > message_len)
+            *len = message_len;
+        memcpy(buf, _rxBuf + headerLen + 1, *len);
+    }
+    _rxBufValid = false; // Got the most recent message, delete it
+                         //    printBuffer("recv:", buf, *len);
+    return true;
 }
 
 void RH_INTERRUPT_ATTR RadioSync::registerSample(bool rxSample)
@@ -23,7 +64,6 @@ void RH_INTERRUPT_ATTR RadioSync::registerSample(bool rxSample)
     if (rxSample)
         _rxIntegrator++;
 }
-
 
 void RH_INTERRUPT_ATTR RadioSync::synchronize()
 {
@@ -42,7 +82,6 @@ void RH_INTERRUPT_ATTR RadioSync::synchronize()
         _rxPllRamp += rampInc;
     }
 }
-
 
 bool RH_INTERRUPT_ATTR RadioSync::bitTransition()
 {

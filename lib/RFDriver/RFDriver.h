@@ -54,25 +54,6 @@ public:
     /// \return true if initialisation succeeded.
     virtual bool init();
 
-    /// Tests whether a new message is available
-    /// from the Driver.
-    /// On most drivers, this will also put the Driver into RHModeRx mode until
-    /// a message is actually received bythe transport, when it wil be returned to RHModeIdle.
-    /// This can be called multiple times in a timeout loop
-    /// \return true if a new, complete, error-free uncollected message is available to be retreived by recv()
-    virtual bool available();
-
-    /// Turns the receiver on if it not already on.
-    /// If there is a valid message available, copy it to buf and return true
-    /// else return false.
-    /// If a message is copied, *len is set to the length (Caution, 0 length messages are permitted).
-    /// You should be sure to call this function frequently enough to not miss any messages
-    /// It is recommended that you call it in your main loop.
-    /// \param[in] buf Location to copy the received message
-    /// \param[in,out] len Pointer to the number of octets available in buf. The number be reset to the actual number of octets copied.
-    /// \return true if a valid message was copied to buf
-    RH_INTERRUPT_ATTR virtual bool recv(uint8_t *buf, uint8_t *len);
-
     /// Waits until any previous transmit packet is finished being transmitted with waitPacketSent().
     /// Then loads a message into the transmitter and starts the transmitter. Note that a message length
     /// of 0 is NOT permitted.
@@ -134,21 +115,6 @@ protected:
     const uint8_t maxMsgLen;
 
     const uint8_t rxSamples;
-
-    /// The size of the receiver ramp. Ramp wraps modulo this number
-    const uint8_t rxRampLen = 160;
-
-    // Ramp adjustment parameters
-    // Standard is if a transition occurs before rampTransition (80) in the ramp,
-    // the ramp is retarded by adding rampIncRetard (11)
-    // else by adding rampIncAdvance (29)
-    // If there is no transition it is adjusted by rampInc (20)
-    /// Internal ramp adjustment parameter
-    const uint8_t rampInc;
-    const uint8_t rampTransition;
-    const uint8_t rampAdjust;
-    const uint8_t rampIncRetard;
-    const uint8_t rampIncAdvance;
 
     volatile uint16_t _rxBad;
     volatile uint16_t _rxGood;
@@ -234,30 +200,6 @@ protected:
 
     /// Buf is full and valid
     volatile bool _rxBufValid;
-
-    volatile bool _rxCurrentSample;
-    /// Last digital input from the rx data pin
-    volatile bool _rxLastSample;
-
-    /// This is the integrate and dump integral. If there are <5 0 samples in the PLL cycle
-    /// the bit is declared a 0, else a 1
-    volatile uint8_t _rxIntegrator;
-
-    /// PLL ramp, varies between 0 and rxRampLen-1 (159) over
-    /// rxSamples (8) samples per nominal bit time.
-    /// When the PLL is synchronised, bit transitions happen at about the
-    /// 0 mark.
-    volatile uint8_t _rxPllRamp;
-
-    /// Flag indicates if we have seen the start symbol of a new message and are
-    /// in the processes of reading and decoding it
-    volatile uint8_t _rxActive;
-
-    /// Last 12 bits received, so we can look for the start symbol
-    volatile uint16_t _rxBits;
-
-    /// How many bits of message we have received. Ranges from 0 to 12
-    volatile uint8_t _rxBitCount;
 
     /// The incoming message buffer
     uint8_t *_rxBuf;
