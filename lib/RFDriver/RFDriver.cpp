@@ -85,8 +85,6 @@ RadioDriver::RadioDriver(
       _pttPin(pttPin),
       _cad_timeout(0),
       _mode(RHModeInitialising),
-      _rxBad(0),
-      _rxGood(0),
       _txGood(0),
       _rxBufValid(false),
       _rxBufFull(false),
@@ -178,7 +176,6 @@ void RadioDriver::setModeTx()
         _mode = RHModeTx;
     }
 }
-
 
 // Caution: this may block
 bool RadioDriver::send(const uint8_t *data, uint8_t len)
@@ -292,32 +289,6 @@ uint8_t RH_INTERRUPT_ATTR RadioDriver::symbol_6to4(uint8_t symbol)
     return 0; // Not found
 }
 
-// Check whether the latest received message is complete and uncorrupted
-// We should always check the FCS at user level, not interrupt level
-// since it is slow
-void RadioDriver::validateRxBuf()
-{
-    uint16_t crc = 0xffff;
-    // The CRC covers the byte count, headers and user data
-    for (uint8_t i = 0; i < _rxBufLen; i++)
-        crc = RHcrc_ccitt_update(crc, _rxBuf[i]);
-    if (crc != 0xf0b8) // CRC when buffer and expected CRC are CRC'd
-    {
-        // Reject and drop the message
-        _rxBad++;
-        _rxBufValid = false;
-        return;
-    }
-
-    // Extract the 4 headers that follow the message length
-    _rxHeaderTo = _rxBuf[1];
-    _rxHeaderFrom = _rxBuf[2];
-    _rxHeaderId = _rxBuf[3];
-    _rxHeaderFlags = _rxBuf[4];
-
-    _rxGood++;
-    _rxBufValid = true;
-}
 
 void RH_INTERRUPT_ATTR RadioDriver::receiveTimer()
 {

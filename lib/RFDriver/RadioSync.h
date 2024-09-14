@@ -37,6 +37,7 @@ public:
 
 
 protected:
+    void validateRxBuf();
 
     void registerSample(bool rxSample) override;
 
@@ -84,4 +85,9 @@ protected:
 
     /// How many bits of message we have received. Ranges from 0 to 12
     volatile uint8_t _rxBitCount;
+
+
+    volatile uint16_t _rxBad;
+    volatile uint16_t _rxGood;
+
 };

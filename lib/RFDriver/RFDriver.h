@@ -116,9 +116,6 @@ protected:
 
     const uint8_t rxSamples;
 
-    volatile uint16_t _rxBad;
-    volatile uint16_t _rxGood;
-
     volatile uint16_t _txGood;
 
     volatile RHMode _mode;
@@ -176,11 +173,6 @@ protected:
 
     /// The transmitter handler function, called a 8 times the bit rate
     void transmitTimer();
-
-    /// Check whether the latest received message is complete and uncorrupted
-    /// We should always check the FCS at user level, not interrupt level
-    /// since it is slow
-    void validateRxBuf();
 
     /// Configure bit rate in bits per second
     uint16_t _speed;
