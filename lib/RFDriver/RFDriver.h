@@ -204,6 +204,8 @@ protected:
     void receiveTimer();
 
     void registerSample(bool rxSample);
+    void synchronize();
+    bool bitTransition();
 
     /// The transmitter handler function, called a 8 times the bit rate
     void transmitTimer();

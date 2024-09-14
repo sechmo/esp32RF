@@ -369,15 +369,10 @@ void RH_INTERRUPT_ATTR RH_ASK::registerSample(bool rxSample)
         _rxIntegrator++;
 }
 
-void RH_INTERRUPT_ATTR RH_ASK::receiveTimer()
+void RH_INTERRUPT_ATTR RH_ASK::synchronize()
 {
-    bool rxSample = readRx();
-
-    registerSample(rxSample);
-
     if (_rxCurrentSample != _rxLastSample)
     {
-
         // Transition, advance if ramp > 80, retard if < 80
         _rxPllRamp += ((_rxPllRamp < rampTransition)
                            ? rampIncRetard
@@ -390,7 +385,20 @@ void RH_INTERRUPT_ATTR RH_ASK::receiveTimer()
         // Advance ramp by standard 20 (== 160/8 samples)
         _rxPllRamp += rampInc;
     }
-    if (_rxPllRamp >= rxRampLen)
+}
+
+bool RH_INTERRUPT_ATTR RH_ASK::bitTransition() {
+    return _rxPllRamp >= rxRampLen;
+}
+
+void RH_INTERRUPT_ATTR RH_ASK::receiveTimer()
+{
+    bool rxSample = readRx();
+
+    registerSample(rxSample);
+
+    synchronize();
+    if (bitTransition())
     {
         // Add this to the 12th bit of _rxBits, LSB first
         // The last 12 bits are kept
