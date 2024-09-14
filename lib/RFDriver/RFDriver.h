@@ -205,8 +205,8 @@ protected:
 
     virtual void registerSample(bool rxSample) = 0;
     virtual void synchronize() = 0;
-    virtual bool bitTransition();
-    virtual void processBit();
+    virtual bool bitTransition() = 0;
+    virtual void processBit() = 0;
 
     /// The transmitter handler function, called a 8 times the bit rate
     void transmitTimer();

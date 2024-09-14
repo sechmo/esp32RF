@@ -18,4 +18,6 @@ protected:
     void registerSample(bool rxSample) override;
 
     void synchronize() override;
+    bool bitTransition() override;
+    void processBit() override;
 };
