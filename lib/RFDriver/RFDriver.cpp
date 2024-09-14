@@ -358,32 +358,32 @@ void RadioDriver::validateRxBuf()
     _rxBufValid = true;
 }
 
-void RH_INTERRUPT_ATTR RadioDriver::registerSample(bool rxSample)
-{
+// void RH_INTERRUPT_ATTR RadioDriver::registerSample(bool rxSample)
+// {
 
-    _rxCurrentSample = rxSample;
-    // Integrate each sample
-    if (rxSample)
-        _rxIntegrator++;
-}
+//     _rxCurrentSample = rxSample;
+//     // Integrate each sample
+//     if (rxSample)
+//         _rxIntegrator++;
+// }
 
-void RH_INTERRUPT_ATTR RadioDriver::synchronize()
-{
-    if (_rxCurrentSample != _rxLastSample)
-    {
-        // Transition, advance if ramp > 80, retard if < 80
-        _rxPllRamp += ((_rxPllRamp < rampTransition)
-                           ? rampIncRetard
-                           : rampIncAdvance);
-        _rxLastSample = _rxCurrentSample;
-    }
-    else
-    {
-        // No transition
-        // Advance ramp by standard 20 (== 160/8 samples)
-        _rxPllRamp += rampInc;
-    }
-}
+// void RH_INTERRUPT_ATTR RadioDriver::synchronize()
+// {
+//     if (_rxCurrentSample != _rxLastSample)
+//     {
+//         // Transition, advance if ramp > 80, retard if < 80
+//         _rxPllRamp += ((_rxPllRamp < rampTransition)
+//                            ? rampIncRetard
+//                            : rampIncAdvance);
+//         _rxLastSample = _rxCurrentSample;
+//     }
+//     else
+//     {
+//         // No transition
+//         // Advance ramp by standard 20 (== 160/8 samples)
+//         _rxPllRamp += rampInc;
+//     }
+// }
 
 bool RH_INTERRUPT_ATTR RadioDriver::bitTransition()
 {

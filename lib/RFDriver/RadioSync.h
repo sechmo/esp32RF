@@ -12,4 +12,10 @@ public:
         uint8_t rxSamples = 8,
         uint8_t rxRampLen = 160,
         uint8_t rampAdjust = 9);
+
+protected:
+
+    void registerSample(bool rxSample) override;
+
+    void synchronize() override;
 };

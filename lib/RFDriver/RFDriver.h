@@ -203,8 +203,8 @@ protected:
     /// The receiver handler function, called a 8 times the bit rate
     void receiveTimer();
 
-    virtual void registerSample(bool rxSample);
-    virtual void synchronize();
+    virtual void registerSample(bool rxSample) = 0;
+    virtual void synchronize() = 0;
     virtual bool bitTransition();
     virtual void processBit();
 

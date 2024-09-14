@@ -14,3 +14,31 @@ RadioSync::RadioSync(
     : RadioDriver(speed, rxPin, txPin, pttPin, maxPayloadLen, rxSamples, rxRampLen, rampAdjust)
 {
 }
+
+void RH_INTERRUPT_ATTR RadioSync::registerSample(bool rxSample)
+{
+
+    _rxCurrentSample = rxSample;
+    // Integrate each sample
+    if (rxSample)
+        _rxIntegrator++;
+}
+
+
+void RH_INTERRUPT_ATTR RadioSync::synchronize()
+{
+    if (_rxCurrentSample != _rxLastSample)
+    {
+        // Transition, advance if ramp > 80, retard if < 80
+        _rxPllRamp += ((_rxPllRamp < rampTransition)
+                           ? rampIncRetard
+                           : rampIncAdvance);
+        _rxLastSample = _rxCurrentSample;
+    }
+    else
+    {
+        // No transition
+        // Advance ramp by standard 20 (== 160/8 samples)
+        _rxPllRamp += rampInc;
+    }
+}
