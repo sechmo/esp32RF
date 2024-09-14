@@ -6,14 +6,14 @@
 #include <RFDriver.h>
 #include <RFCRC.h>
 
-bool RH_ASK::waitPacketSent()
+bool RadioDriver::waitPacketSent()
 {
     while (_mode == RHModeTx)
         yield(); // Wait for any previous transmit to finish
     return true;
 }
 
-bool RH_ASK::waitCAD()
+bool RadioDriver::waitCAD()
 {
     if (!_cad_timeout)
         return true;
@@ -35,7 +35,7 @@ bool RH_ASK::waitCAD()
 }
 
 // subclasses are expected to override if CAD is available for that radio
-bool RH_ASK::isChannelActive()
+bool RadioDriver::isChannelActive()
 {
     return false;
 }
@@ -56,7 +56,7 @@ DRAM_ATTR hw_timer_t *timer;
 // Uncomment the define RH_ASK_ATTINY_USE_TIMER1 bellow, if you want tRC
 
 // Interrupt handler uses this to find the most recently initialised instance of this driver
-static RH_ASK *thisASKDriver;
+static RadioDriver *thisASKDriver;
 
 // 4 bit to 6 bit symbol converter table
 // Used to convert the high and low nybbles of the transmitted data
@@ -70,7 +70,7 @@ RH_DRAM_ATTR static uint8_t symbols[] =
 // This is the value of the start symbol after 6-bit conversion and nybble swapping
 // #define startSymbol 0xb38
 
-RH_ASK::RH_ASK(
+RadioDriver::RadioDriver(
     uint16_t speed,
     uint8_t rxPin,
     uint8_t txPin,
@@ -112,7 +112,7 @@ RH_ASK::RH_ASK(
     memcpy(_txBuf, preamble, sizeof(preamble));
 }
 
-bool RH_ASK::init()
+bool RadioDriver::init()
 {
     thisASKDriver = this;
 
@@ -132,13 +132,13 @@ bool RH_ASK::init()
 // Returns prescaler index into {0, 1, 8, 64, 256, 1024} array
 // and sets nticks to compare-match value if lower than max_ticks
 // returns 0 & nticks = 0 on fault
-uint8_t RH_ASK::timerCalc(uint16_t speed, uint16_t max_ticks, uint16_t *nticks)
+uint8_t RadioDriver::timerCalc(uint16_t speed, uint16_t max_ticks, uint16_t *nticks)
 {
     return 0; // not implemented or needed on other platforms
 }
 
 // The idea here is to get 8 timer interrupts per bit period
-void RH_ASK::timerSetup()
+void RadioDriver::timerSetup()
 {
     void RH_INTERRUPT_ATTR esp32_timer_interrupt_handler(); // Forward declaration
     // Prior to version 3
@@ -148,7 +148,7 @@ void RH_ASK::timerSetup()
     timerAlarmEnable(timer);
 }
 
-void RH_INTERRUPT_ATTR RH_ASK::setModeIdle()
+void RH_INTERRUPT_ATTR RadioDriver::setModeIdle()
 {
     if (_mode != RHModeIdle)
     {
@@ -159,7 +159,7 @@ void RH_INTERRUPT_ATTR RH_ASK::setModeIdle()
     }
 }
 
-void RH_INTERRUPT_ATTR RH_ASK::setModeRx()
+void RH_INTERRUPT_ATTR RadioDriver::setModeRx()
 {
     if (_mode != RHModeRx)
     {
@@ -170,7 +170,7 @@ void RH_INTERRUPT_ATTR RH_ASK::setModeRx()
     }
 }
 
-void RH_ASK::setModeTx()
+void RadioDriver::setModeTx()
 {
     if (_mode != RHModeTx)
     {
@@ -187,7 +187,7 @@ void RH_ASK::setModeTx()
 }
 
 // Call this often
-bool RH_ASK::available()
+bool RadioDriver::available()
 {
     if (_mode == RHModeTx)
         return false;
@@ -200,7 +200,7 @@ bool RH_ASK::available()
     return _rxBufValid;
 }
 
-bool RH_INTERRUPT_ATTR RH_ASK::recv(uint8_t *buf, uint8_t *len)
+bool RH_INTERRUPT_ATTR RadioDriver::recv(uint8_t *buf, uint8_t *len)
 {
     if (!available())
         return false;
@@ -220,7 +220,7 @@ bool RH_INTERRUPT_ATTR RH_ASK::recv(uint8_t *buf, uint8_t *len)
 }
 
 // Caution: this may block
-bool RH_ASK::send(const uint8_t *data, uint8_t len)
+bool RadioDriver::send(const uint8_t *data, uint8_t len)
 {
     uint8_t i;
     uint16_t index = 0;
@@ -284,7 +284,7 @@ bool RH_ASK::send(const uint8_t *data, uint8_t len)
 }
 
 // Read the RX data input pin, taking into account platform type and inversion.
-bool RH_INTERRUPT_ATTR RH_ASK::readRx()
+bool RH_INTERRUPT_ATTR RadioDriver::readRx()
 {
     bool value;
     value = digitalRead(_rxPin);
@@ -292,18 +292,18 @@ bool RH_INTERRUPT_ATTR RH_ASK::readRx()
 }
 
 // Write the TX output pin, taking into account platform type.
-void RH_INTERRUPT_ATTR RH_ASK::writeTx(bool value)
+void RH_INTERRUPT_ATTR RadioDriver::writeTx(bool value)
 {
     digitalWrite(_txPin, value);
 }
 
 // Write the PTT output pin, taking into account platform type and inversion.
-void RH_INTERRUPT_ATTR RH_ASK::writePtt(bool value)
+void RH_INTERRUPT_ATTR RadioDriver::writePtt(bool value)
 {
     digitalWrite(_pttPin, value);
 }
 
-uint8_t RH_ASK::maxMessageLength()
+uint8_t RadioDriver::maxMessageLength()
 {
     return maxMsgLen;
 }
@@ -314,7 +314,7 @@ void RH_INTERRUPT_ATTR esp32_timer_interrupt_handler()
 }
 
 // Convert a 6 bit encoded symbol into its 4 bit decoded equivalent
-uint8_t RH_INTERRUPT_ATTR RH_ASK::symbol_6to4(uint8_t symbol)
+uint8_t RH_INTERRUPT_ATTR RadioDriver::symbol_6to4(uint8_t symbol)
 {
     uint8_t i;
     uint8_t count;
@@ -334,7 +334,7 @@ uint8_t RH_INTERRUPT_ATTR RH_ASK::symbol_6to4(uint8_t symbol)
 // Check whether the latest received message is complete and uncorrupted
 // We should always check the FCS at user level, not interrupt level
 // since it is slow
-void RH_ASK::validateRxBuf()
+void RadioDriver::validateRxBuf()
 {
     uint16_t crc = 0xffff;
     // The CRC covers the byte count, headers and user data
@@ -358,7 +358,7 @@ void RH_ASK::validateRxBuf()
     _rxBufValid = true;
 }
 
-void RH_INTERRUPT_ATTR RH_ASK::registerSample(bool rxSample)
+void RH_INTERRUPT_ATTR RadioDriver::registerSample(bool rxSample)
 {
 
     _rxCurrentSample = rxSample;
@@ -367,7 +367,7 @@ void RH_INTERRUPT_ATTR RH_ASK::registerSample(bool rxSample)
         _rxIntegrator++;
 }
 
-void RH_INTERRUPT_ATTR RH_ASK::synchronize()
+void RH_INTERRUPT_ATTR RadioDriver::synchronize()
 {
     if (_rxCurrentSample != _rxLastSample)
     {
@@ -385,12 +385,12 @@ void RH_INTERRUPT_ATTR RH_ASK::synchronize()
     }
 }
 
-bool RH_INTERRUPT_ATTR RH_ASK::bitTransition()
+bool RH_INTERRUPT_ATTR RadioDriver::bitTransition()
 {
     return _rxPllRamp >= rxRampLen;
 }
 
-void RH_INTERRUPT_ATTR RH_ASK::processBit()
+void RH_INTERRUPT_ATTR RadioDriver::processBit()
 {
 
     // Add this to the 12th bit of _rxBits, LSB first
@@ -461,7 +461,7 @@ void RH_INTERRUPT_ATTR RH_ASK::processBit()
     }
 }
 
-void RH_INTERRUPT_ATTR RH_ASK::receiveTimer()
+void RH_INTERRUPT_ATTR RadioDriver::receiveTimer()
 {
     bool rxSample = readRx();
 
@@ -474,7 +474,7 @@ void RH_INTERRUPT_ATTR RH_ASK::receiveTimer()
     }
 }
 
-void RH_INTERRUPT_ATTR RH_ASK::transmitTimer()
+void RH_INTERRUPT_ATTR RadioDriver::transmitTimer()
 {
     if (_txSample++ == 0)
     {
@@ -502,7 +502,7 @@ void RH_INTERRUPT_ATTR RH_ASK::transmitTimer()
         _txSample = 0;
 }
 
-void RH_INTERRUPT_ATTR RH_ASK::handleTimerInterrupt()
+void RH_INTERRUPT_ATTR RadioDriver::handleTimerInterrupt()
 {
     if (_mode == RHModeRx)
         receiveTimer(); // Receiving

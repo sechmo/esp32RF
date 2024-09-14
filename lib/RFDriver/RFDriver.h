@@ -12,7 +12,7 @@
 // #include <RFGenericDriver.h>
 
 
-class RH_ASK //: public RHGenericDriver
+class RadioDriver //: public RHGenericDriver
 {
 public:
     typedef enum
@@ -32,7 +32,7 @@ public:
     /// \param[in] txPin The pin that is used to send data to the transmitter
     /// \param[in] pttPin The pin that is connected to the transmitter controller. It will be set HIGH to enable the transmitter (unless pttInverted is true).
     /// \param[in] pttInverted true if you desire the pttin to be inverted so that LOW wil enable the transmitter.
-    RH_ASK(
+    RadioDriver(
         uint16_t speed = 2000,
         uint8_t rxPin = 11,
         uint8_t txPin = 12,
@@ -203,10 +203,10 @@ protected:
     /// The receiver handler function, called a 8 times the bit rate
     void receiveTimer();
 
-    void registerSample(bool rxSample);
-    void synchronize();
-    bool bitTransition();
-    void processBit();
+    virtual void registerSample(bool rxSample);
+    virtual void synchronize();
+    virtual bool bitTransition();
+    virtual void processBit();
 
     /// The transmitter handler function, called a 8 times the bit rate
     void transmitTimer();
