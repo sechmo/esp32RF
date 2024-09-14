@@ -105,11 +105,6 @@ public:
     /// \return The current speed in bits per second
     uint16_t speed() { return _speed; }
 
-#if (RH_PLATFORM == RH_PLATFORM_ESP8266)
-    /// ESP8266 timer0 increment value
-    uint32_t _timerIncrement;
-#endif
-
 protected:
     const uint16_t startSymbol = 0xb38;
 
@@ -208,6 +203,8 @@ protected:
     /// The receiver handler function, called a 8 times the bit rate
     void receiveTimer();
 
+    void registerSample(bool rxSample);
+
     /// The transmitter handler function, called a 8 times the bit rate
     void transmitTimer();
 
@@ -235,6 +232,7 @@ protected:
     /// Buf is full and valid
     volatile bool _rxBufValid;
 
+    volatile bool _rxCurrentSample;
     /// Last digital input from the rx data pin
     volatile bool _rxLastSample;
 

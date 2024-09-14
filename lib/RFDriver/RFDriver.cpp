@@ -332,6 +332,7 @@ uint8_t RH_INTERRUPT_ATTR RH_ASK::symbol_6to4(uint8_t symbol)
     return 0; // Not found
 }
 
+
 // Check whether the latest received message is complete and uncorrupted
 // We should always check the FCS at user level, not interrupt level
 // since it is slow
@@ -359,22 +360,29 @@ void RH_ASK::validateRxBuf()
     _rxBufValid = true;
 }
 
+void RH_INTERRUPT_ATTR RH_ASK::registerSample(bool rxSample)
+{
+
+    _rxCurrentSample = rxSample;
+    // Integrate each sample
+    if (rxSample)
+        _rxIntegrator++;
+}
+
 void RH_INTERRUPT_ATTR RH_ASK::receiveTimer()
 {
     bool rxSample = readRx();
 
-    // Integrate each sample
-    if (rxSample)
-        _rxIntegrator++;
+    registerSample(rxSample);
 
-    if (rxSample != _rxLastSample)
+    if (_rxCurrentSample != _rxLastSample)
     {
 
         // Transition, advance if ramp > 80, retard if < 80
         _rxPllRamp += ((_rxPllRamp < rampTransition)
                            ? rampIncRetard
                            : rampIncAdvance);
-        _rxLastSample = rxSample;
+        _rxLastSample = _rxCurrentSample;
     }
     else
     {
