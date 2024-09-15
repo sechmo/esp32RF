@@ -7,10 +7,9 @@ RadioSync::RadioSync(
     uint8_t txPin,
     uint8_t pttPin,
     uint8_t maxPayloadLen,
-    uint8_t rxSamples,
     uint8_t rxRampLen,
     uint8_t rampAdjust)
-    : RadioDriver(speed, rxPin, txPin, pttPin, maxPayloadLen, rxSamples, rxRampLen, rampAdjust),
+    : RadioDriver(speed, rxPin, txPin, pttPin, maxPayloadLen),
       _rxIntegrator(0),
       rxRampLen(rxRampLen),
       rampTransition(rxRampLen / 2),

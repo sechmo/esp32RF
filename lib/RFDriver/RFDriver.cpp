@@ -75,10 +75,7 @@ RadioDriver::RadioDriver(
     uint8_t rxPin,
     uint8_t txPin,
     uint8_t pttPin,
-    uint8_t maxPayloadLen,
-    uint8_t rxSamples,
-    uint8_t rxRampLen,
-    uint8_t rampAdjust)
+    uint8_t maxPayloadLen)
     : _speed(speed),
       _rxPin(rxPin),
       _txPin(txPin),
@@ -86,7 +83,6 @@ RadioDriver::RadioDriver(
       _cad_timeout(0),
       _mode(RHModeInitialising),
       _txGood(0),
-      rxSamples(rxSamples),
       maxPayloadLen(maxPayloadLen),
       maxMsgLen(maxPayloadLen - headerLen - 3),
       _txBuf(new uint8_t[maxPayloadLen * 2 + preambleLen])
@@ -323,7 +319,7 @@ void RH_INTERRUPT_ATTR RadioDriver::transmitTimer()
         }
     }
 
-    if (_txSample >= rxSamples)
+    if (_txSample >= rxSamples) 
         _txSample = 0;
 }
 

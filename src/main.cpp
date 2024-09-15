@@ -10,10 +10,10 @@
 const uint8_t inputPin = GPIO_NUM_33;
 const uint8_t outputPin = GPIO_NUM_19;
 const int ledPin = GPIO_NUM_2;
-const bool isReceiver = false;
+const bool isReceiver = true;
 
 const int speed = 2000;
-#define USE_OWN 0
+#define USE_OWN 1
 #if (USE_OWN == 1)
 #include <RadioSync.h>
 
