@@ -165,10 +165,6 @@ void RH_INTERRUPT_ATTR RadioDriver::transmitTimer()
 {
     if (_txSample++ == 0)
     {
-        // Send next bit
-        // Symbols are sent LSB first
-        // Finished sending the whole message? (after waiting one bit period
-        // since the last bit)
         if (moreBitsToTransmit()) {
             writeTx(nextBitToTransmit());
         }

@@ -171,6 +171,10 @@ uint8_t RadioCoder::decodeByte(uint16_t receivedBits)
 
 
 
+// Send next bit
+// Symbols are sent LSB first
+// Finished sending the whole message? (after waiting one bit period
+// since the last bit)
 bool RH_INTERRUPT_ATTR RadioCoder::moreBitsToTransmit() {
     return _txIndex < _txBufLen;
 }
