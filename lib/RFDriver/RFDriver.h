@@ -141,6 +141,7 @@ protected:
     /// The transmitter handler function, called a 8 times the bit rate
     void transmitTimer();
 
+    virtual void prepareTransmit() = 0;
     virtual bool moreBitsToTransmit() = 0;
     virtual bool nextBitToTransmit() = 0;
 
@@ -156,15 +157,11 @@ protected:
     /// The configured transmitter enable pin
     uint8_t _pttPin;
 
-    /// Index of the next symbol to send. Ranges from 0 to vw_tx_len
-    uint8_t _txIndex;
-};
-
-    /// Bit number of next bit to send
-    uint8_t _txBit;
-
     /// Sample number for the transmitter. Runs 0 to 7 during one bit interval
     uint8_t _txSample;
+
+};
+
 
 /// @example ask_reliable_datagram_client.ino
 /// @example ask_reliable_datagram_server.ino

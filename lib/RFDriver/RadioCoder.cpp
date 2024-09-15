@@ -67,6 +67,12 @@ bool RH_INTERRUPT_ATTR RadioCoder::recv(uint8_t *buf, uint8_t *len)
 }
 
 
+void RH_INTERRUPT_ATTR RadioCoder::prepareTransmit()
+{
+    _txIndex = 0;
+    _txBit = 0;
+}
+
 bool RadioCoder::waitPacketSent()
 {
     while (_mode == RHModeTx)

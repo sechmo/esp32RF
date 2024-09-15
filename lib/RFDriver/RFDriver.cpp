@@ -107,9 +107,7 @@ void RadioDriver::setModeTx()
 {
     if (_mode != RHModeTx)
     {
-        // PRepare state varibles for a new transmission
-        _txIndex = 0;
-        _txBit = 0;
+        prepareTransmit();
         _txSample = 0;
 
         // Enable the transmitter hardware

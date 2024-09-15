@@ -54,10 +54,18 @@ protected:
 
 
 
-    bool RH_INTERRUPT_ATTR moreBitsToTransmit() override;
+    bool moreBitsToTransmit() override;
 
-    bool RH_INTERRUPT_ATTR nextBitToTransmit() override;
+    bool nextBitToTransmit() override;
 
+    void prepareTransmit() override;
+
+
+    /// Index of the next symbol to send. Ranges from 0 to vw_tx_len
+    uint8_t _txIndex;
+
+    /// Bit number of next bit to send
+    uint8_t _txBit;
     /// The transmitter buffer in _symbols_ not data octets
     uint8_t *_txBuf;
 
