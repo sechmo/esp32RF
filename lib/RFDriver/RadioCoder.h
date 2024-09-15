@@ -51,4 +51,16 @@ protected:
 
     /// Translates a 6 bit symbol to its 4 bit plaintext equivalent
     RH_INTERRUPT_ATTR uint8_t symbol_6to4(uint8_t symbol);
+
+
+
+    bool RH_INTERRUPT_ATTR moreBitsToTransmit() override;
+
+    bool RH_INTERRUPT_ATTR nextBitToTransmit() override;
+
+    /// The transmitter buffer in _symbols_ not data octets
+    uint8_t *_txBuf;
+
+    /// Number of symbols in _txBuf to be sent;
+    uint8_t _txBufLen;
 };

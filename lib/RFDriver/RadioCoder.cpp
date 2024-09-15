@@ -21,8 +21,15 @@ RadioCoder::RadioCoder(
     uint8_t maxPayloadLen,
     uint8_t rxRampLen,
     uint8_t rampAdjust)
-    : RadioSync(speed, rxPin, txPin, pttPin, maxPayloadLen, rxRampLen, rampAdjust)
+    : RadioSync(speed, rxPin, txPin, pttPin, maxPayloadLen, rxRampLen, rampAdjust),
+      _txBuf(new uint8_t[maxPayloadLen * 2 + preambleLen])
 {
+    // Initialise the first 8 nibbles of the tx buffer to be the stanRCdard
+    // preamble. We will append messages after that. 0x38, 0x2c is the start symbol before
+    // 6-bit conversion to startSymbol
+    // uint8_t preamble[preambleLen] = {0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x38, 0x2c};
+    uint8_t preamble[preambleLen] = {0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, startSymbol & 0x3f, startSymbol >> 6};
+    memcpy(_txBuf, preamble, sizeof(preamble));
 }
 
 
@@ -154,4 +161,27 @@ uint8_t RadioCoder::decodeByte(uint16_t receivedBits)
     // Decode the 12 bits into 2 lots of 6 bits
     // The 6 lsbits are the high nybble
     return (symbol_6to4(receivedBits & 0x3f) << 4) | symbol_6to4(receivedBits >> 6);
+}
+
+
+
+bool RH_INTERRUPT_ATTR RadioCoder::moreBitsToTransmit() {
+    return _txIndex < _txBufLen;
+}
+
+
+bool RH_INTERRUPT_ATTR RadioCoder::nextBitToTransmit() {
+
+    bool nextBit = _txBuf[_txIndex] & (1 << _txBit);
+
+    _txBit++;
+
+    if (_txBit >= 6)
+    {
+        _txBit = 0;
+        _txIndex++;
+    }
+
+
+    return nextBit;
 }

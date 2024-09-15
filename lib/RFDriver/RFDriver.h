@@ -158,19 +158,13 @@ protected:
 
     /// Index of the next symbol to send. Ranges from 0 to vw_tx_len
     uint8_t _txIndex;
+};
 
     /// Bit number of next bit to send
     uint8_t _txBit;
 
     /// Sample number for the transmitter. Runs 0 to 7 during one bit interval
     uint8_t _txSample;
-
-    /// The transmitter buffer in _symbols_ not data octets
-    uint8_t *_txBuf;
-
-    /// Number of symbols in _txBuf to be sent;
-    uint8_t _txBufLen;
-};
 
 /// @example ask_reliable_datagram_client.ino
 /// @example ask_reliable_datagram_server.ino

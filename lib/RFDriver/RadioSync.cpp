@@ -126,13 +126,13 @@ void RH_INTERRUPT_ATTR RadioSync::processBit()
 
                 // setModeIdle();
                 // return;
-                if (_rxCount < 7 || _rxCount > maxPayloadLen)
-                {
-                    // Stupid message length, drop the whole thing
-                    _rxActive = false;
-                    _rxBad++;
-                    return;
-                }
+                // if (_rxCount < 7 || _rxCount > maxPayloadLen)
+                // {
+                //     // Stupid message length, drop the whole thing
+                //     _rxActive = false;
+                //     _rxBad++;
+                //     return;
+                // }
             }
             _rxBuf[_rxBufLen++] = this_byte;
 
@@ -158,24 +158,3 @@ void RH_INTERRUPT_ATTR RadioSync::processBit()
     }
 }
 
-
-bool RH_INTERRUPT_ATTR RadioSync::moreBitsToTransmit() {
-    return _txIndex < _txBufLen;
-}
-
-
-bool RH_INTERRUPT_ATTR RadioSync::nextBitToTransmit() {
-
-    bool nextBit = _txBuf[_txIndex] & (1 << _txBit);
-
-    _txBit++;
-
-    if (_txBit >= 6)
-    {
-        _txBit = 0;
-        _txIndex++;
-    }
-
-
-    return nextBit;
-}

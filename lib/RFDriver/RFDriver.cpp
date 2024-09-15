@@ -41,15 +41,8 @@ RadioDriver::RadioDriver(
       _mode(RHModeInitialising),
       _txGood(0),
       maxPayloadLen(maxPayloadLen),
-      maxMsgLen(maxPayloadLen - headerLen - 3),
-      _txBuf(new uint8_t[maxPayloadLen * 2 + preambleLen])
+      maxMsgLen(maxPayloadLen - headerLen - 3)
 {
-    // Initialise the first 8 nibbles of the tx buffer to be the stanRCdard
-    // preamble. We will append messages after that. 0x38, 0x2c is the start symbol before
-    // 6-bit conversion to startSymbol
-    // uint8_t preamble[preambleLen] = {0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x38, 0x2c};
-    uint8_t preamble[preambleLen] = {0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, startSymbol & 0x3f, startSymbol >> 6};
-    memcpy(_txBuf, preamble, sizeof(preamble));
 }
 
 bool RadioDriver::init()
