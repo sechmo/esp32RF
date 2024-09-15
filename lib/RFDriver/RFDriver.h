@@ -105,18 +105,6 @@ protected:
 
     volatile RHMode _mode;
 
-    /// TO header to send in all messages
-    uint8_t _txHeaderTo;
-
-    /// FROM header to send in all messages
-    uint8_t _txHeaderFrom;
-
-    /// ID header to send in all messages
-    uint8_t _txHeaderId;
-
-    /// FLAGS header to send in all messages
-    uint8_t _txHeaderFlags;
-
     /// Set up the timer and its interrutps so the interrupt handler is called at the right frequency
     void timerSetup();
 

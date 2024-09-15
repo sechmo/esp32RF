@@ -53,6 +53,17 @@ protected:
     RH_INTERRUPT_ATTR uint8_t symbol_6to4(uint8_t symbol);
 
 
+    /// TO header to send in all messages
+    uint8_t _txHeaderTo;
+
+    /// FROM header to send in all messages
+    uint8_t _txHeaderFrom;
+
+    /// ID header to send in all messages
+    uint8_t _txHeaderId;
+
+    /// FLAGS header to send in all messages
+    uint8_t _txHeaderFlags;
 
     bool moreBitsToTransmit() override;
 

@@ -37,7 +37,6 @@ RadioDriver::RadioDriver(
       _rxPin(rxPin),
       _txPin(txPin),
       _pttPin(pttPin),
-      _cad_timeout(0),
       _mode(RHModeInitialising),
       _txGood(0),
       maxPayloadLen(maxPayloadLen),
