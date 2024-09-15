@@ -104,7 +104,6 @@ protected:
     volatile uint16_t _txGood;
 
     volatile RHMode _mode;
-    unsigned int _cad_timeout;
 
     /// TO header to send in all messages
     uint8_t _txHeaderTo;
