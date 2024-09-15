@@ -86,13 +86,9 @@ RadioDriver::RadioDriver(
       _cad_timeout(0),
       _mode(RHModeInitialising),
       _txGood(0),
-      _rxBufValid(false),
-      _rxBufFull(false),
-      _rxBufLen(0),
       rxSamples(rxSamples),
       maxPayloadLen(maxPayloadLen),
       maxMsgLen(maxPayloadLen - headerLen - 3),
-      _rxBuf(new uint8_t[maxPayloadLen]),
       _txBuf(new uint8_t[maxPayloadLen * 2 + preambleLen])
 {
     // Initialise the first 8 nibbles of the tx buffer to be the stanRCdard
@@ -117,15 +113,6 @@ bool RadioDriver::init()
     timerSetup();
 
     return true;
-}
-
-// Common function for setting timer ticks @ prescaler values for speed
-// Returns prescaler index into {0, 1, 8, 64, 256, 1024} array
-// and sets nticks to compare-match value if lower than max_ticks
-// returns 0 & nticks = 0 on fault
-uint8_t RadioDriver::timerCalc(uint16_t speed, uint16_t max_ticks, uint16_t *nticks)
-{
-    return 0; // not implemented or needed on other platforms
 }
 
 // The idea here is to get 8 timer interrupts per bit period
@@ -327,7 +314,7 @@ void RH_INTERRUPT_ATTR RadioDriver::transmitTimer()
         }
     }
 
-    if (_txSample > 7)
+    if (_txSample >= rxSamples)
         _txSample = 0;
 }
 

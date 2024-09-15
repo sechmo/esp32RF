@@ -45,6 +45,35 @@ protected:
     bool bitTransition() override;
     void processBit() override;
 
+    /// TO header in the last received mesasge
+    volatile uint8_t _rxHeaderTo;
+
+    /// FROM header in the last received mesasge
+    volatile uint8_t _rxHeaderFrom;
+
+    /// ID header in the last received mesasge
+    volatile uint8_t _rxHeaderId;
+
+    /// FLAGS header in the last received mesasge
+    volatile uint8_t _rxHeaderFlags;
+
+
+
+    // Used in the interrupt handlers
+    /// Buf is filled but not validated
+    volatile bool _rxBufFull;
+
+    /// Buf is full and valid
+    volatile bool _rxBufValid;
+
+    /// The incoming message buffer
+    uint8_t *_rxBuf;
+
+    /// The incoming message expected length
+    volatile uint8_t _rxCount;
+
+    /// The incoming message buffer length received so far
+    volatile uint8_t _rxBufLen;
 
 
     /// The size of the receiver ramp. Ramp wraps modulo this number

@@ -10,20 +10,21 @@
 const uint8_t inputPin = GPIO_NUM_33;
 const uint8_t outputPin = GPIO_NUM_19;
 const int ledPin = GPIO_NUM_2;
-const bool isReceiver = true;
+const bool isReceiver = false;
 
 const int speed = 2000;
-#define USE_OWN 1
+#define USE_OWN 0
 #if (USE_OWN == 1)
 #include <RadioSync.h>
 
+RadioSync driver(speed, inputPin, outputPin, 0); // ESP8266 or ESP32: do not use pin 11 or 2
 #else
 
-// #include <RH_ASK.h>
-// #include <SPI.h> // Not actually used but needed to compile
+#include <RH_ASK.h>
+#include <SPI.h> // Not actually used but needed to compile
+RH_ASK driver(speed, inputPin, outputPin, 0); // ESP8266 or ESP32: do not use pin 11 or 2
 #endif
 
-RadioSync driver(speed, inputPin, outputPin, 0); // ESP8266 or ESP32: do not use pin 11 or 2
 
 uint8_t *buf;
 uint8_t buflen;
@@ -40,6 +41,7 @@ void setup()
     buflen = driver.maxMessageLength();
 
     buf = new uint8_t[buflen];
+
 }
 
 void loopReceiver()

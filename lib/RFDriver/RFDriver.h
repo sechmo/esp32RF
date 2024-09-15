@@ -121,18 +121,6 @@ protected:
     volatile RHMode _mode;
     unsigned int _cad_timeout;
 
-    /// TO header in the last received mesasge
-    volatile uint8_t _rxHeaderTo;
-
-    /// FROM header in the last received mesasge
-    volatile uint8_t _rxHeaderFrom;
-
-    /// ID header in the last received mesasge
-    volatile uint8_t _rxHeaderId;
-
-    /// FLAGS header in the last received mesasge
-    volatile uint8_t _rxHeaderFlags;
-
     /// TO header to send in all messages
     uint8_t _txHeaderTo;
 
@@ -144,9 +132,6 @@ protected:
 
     /// FLAGS header to send in all messages
     uint8_t _txHeaderFlags;
-
-    /// Helper function for calculating timer ticks
-    uint8_t timerCalc(uint16_t speed, uint16_t max_ticks, uint16_t *nticks);
 
     /// Set up the timer and its interrutps so the interrupt handler is called at the right frequency
     void timerSetup();
@@ -185,22 +170,6 @@ protected:
 
     /// The configured transmitter enable pin
     uint8_t _pttPin;
-
-    // Used in the interrupt handlers
-    /// Buf is filled but not validated
-    volatile bool _rxBufFull;
-
-    /// Buf is full and valid
-    volatile bool _rxBufValid;
-
-    /// The incoming message buffer
-    uint8_t *_rxBuf;
-
-    /// The incoming message expected length
-    volatile uint8_t _rxCount;
-
-    /// The incoming message buffer length received so far
-    volatile uint8_t _rxBufLen;
 
     /// Index of the next symbol to send. Ranges from 0 to vw_tx_len
     uint8_t _txIndex;
