@@ -40,20 +40,12 @@ public:
         uint8_t maxPayloadLen = 67
         );
 
-    virtual bool waitPacketSent();
 
     /// Initialise the Driver transport hardware and software.
     /// Make sure the Driver is properly configured before calling init().
     /// \return true if initialisation succeeded.
     virtual bool init();
 
-    /// Waits until any previous transmit packet is finished being transmitted with waitPacketSent().
-    /// Then loads a message into the transmitter and starts the transmitter. Note that a message length
-    /// of 0 is NOT permitted.
-    /// \param[in] data Array of data to be sent
-    /// \param[in] len Number of bytes of data to send (> 0)
-    /// \return true if the message length was valid and it was correctly queued for transmit
-    virtual bool send(const uint8_t *data, uint8_t len);
 
     /// Returns the maximum message length
     /// available in this Driver.
@@ -137,9 +129,6 @@ protected:
 
     /// Write the txPin in a platform dependent way, taking into account whether it is inverted or not
     void writePtt(bool value);
-
-    /// Translates a 6 bit symbol to its 4 bit plaintext equivalent
-    RH_INTERRUPT_ATTR uint8_t symbol_6to4(uint8_t symbol);
 
     /// The receiver handler function, called a 8 times the bit rate
     void receiveTimer();

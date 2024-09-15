@@ -111,8 +111,8 @@ void RH_INTERRUPT_ATTR RadioSync::processBit()
             // Have 12 bits of encoded message == 1 byte encoded
             // Decode as 2 lots of 6 bits into 2 lots of 4 bits
             // The 6 lsbits are the high nybble
-            uint8_t this_byte =
-                (symbol_6to4(_rxBits & 0x3f)) << 4 | symbol_6to4(_rxBits >> 6);
+            uint8_t this_byte = decodeByte(_rxBits);
+                // (symbol_6to4(_rxBits & 0x3f)) << 4 | symbol_6to4(_rxBits >> 6);
 
             // The first decoded byte is the byte count of the following message
             // the count includes the byte count and the 2 trailing FCS bytes

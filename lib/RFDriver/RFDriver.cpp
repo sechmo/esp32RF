@@ -4,14 +4,12 @@
 // $Id: RH_ASK.cpp,v 1.32 2020/08/04 09:02:14 mikem Exp $
 
 #include <RFDriver.h>
-#include <RFCRC.h>
 
 
 
 // Michael Cain
 DRAM_ATTR hw_timer_t *timer;
 // jPerotto Non-constant static data from ESP32 https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/general-notes.html#dram-data-ram
-#define RH_DRAM_ATTR DRAM_ATTR
 
 // RH_ASK on Arduino uses Timer 1 to generate interrupts 8 times per bit interval
 // Define RH_ASK_ARDUINO_USE_TIMER2 if you want to use Timer 2 instead of Timer 1 on Arduino
@@ -25,15 +23,6 @@ DRAM_ATTR hw_timer_t *timer;
 
 // Interrupt handler uses this to find the most recently initialised instance of this driver
 static RadioDriver *thisASKDriver;
-
-// 4 bit to 6 bit symbol converter table
-// Used to convert the high and low nybbles of the transmitted data
-// into 6 bit symbols for transmission. Each 6-bit symbol has 3 1s and 3 0s
-// with at most 3 consecutive identical bits
-RH_DRAM_ATTR static uint8_t symbols[] =
-    {
-        0xd, 0xe, 0x13, 0x15, 0x16, 0x19, 0x1a, 0x1c,
-        0x23, 0x25, 0x26, 0x29, 0x2a, 0x2c, 0x32, 0x34};
 
 // This is the value of the start symbol after 6-bit conversion and nybble swapping
 // #define startSymbol 0xb38
@@ -73,12 +62,12 @@ bool RadioDriver::init()
     pinMode(_pttPin, OUTPUT);
 
 
-    Serial.print("start symbol");
-    Serial.println(startSymbol, HEX);
-    Serial.print("start symbol 6to4 lower");
-    Serial.println(symbols[startSymbol & 0x3f], HEX);
-    Serial.print("start symbol 6to4 upper");
-    Serial.println(symbols[startSymbol >> 6], HEX);
+    // Serial.print("start symbol");
+    // Serial.println(startSymbol, HEX);
+    // Serial.print("start symbol 6to4 lower");
+    // Serial.println(symbols[startSymbol & 0x3f], HEX);
+    // Serial.print("start symbol 6to4 upper");
+    // Serial.println(symbols[startSymbol >> 6], HEX);
 
 
     // Ready to go
@@ -138,74 +127,6 @@ void RadioDriver::setModeTx()
 }
 
 
-bool RadioDriver::waitPacketSent()
-{
-    while (_mode == RHModeTx)
-        yield(); // Wait for any previous transmit to finish
-    return true;
-}
-
-// Caution: this may block
-bool RadioDriver::send(const uint8_t *data, uint8_t len)
-{
-    uint8_t i;
-    uint16_t index = 0;
-    uint16_t crc = 0xffff;
-    uint8_t *p = _txBuf + preambleLen;   // start of the message area
-    uint8_t count = len + 3 + headerLen; // Added byte count and FCS and headers to get total number of bytes
-
-    if (len > maxMsgLen)
-        return false;
-
-    // Wait for transmitter to become available
-    waitPacketSent();
-
-    // Encode the message length
-    crc = RHcrc_ccitt_update(crc, count);
-    p[index++] = symbols[count >> 4];
-    p[index++] = symbols[count & 0xf];
-
-    // Encode the headers
-    crc = RHcrc_ccitt_update(crc, _txHeaderTo);
-    p[index++] = symbols[_txHeaderTo >> 4];
-    p[index++] = symbols[_txHeaderTo & 0xf];
-    crc = RHcrc_ccitt_update(crc, _txHeaderFrom);
-    p[index++] = symbols[_txHeaderFrom >> 4];
-    p[index++] = symbols[_txHeaderFrom & 0xf];
-    crc = RHcrc_ccitt_update(crc, _txHeaderId);
-    p[index++] = symbols[_txHeaderId >> 4];
-    p[index++] = symbols[_txHeaderId & 0xf];
-    crc = RHcrc_ccitt_update(crc, _txHeaderFlags);
-    p[index++] = symbols[_txHeaderFlags >> 4];
-    p[index++] = symbols[_txHeaderFlags & 0xf];
-
-    // Encode the message into 6 bit symbols. Each byte is converted into
-    // 2 6-bit symbols, high nybble first, low nybble second
-    for (i = 0; i < len; i++)
-    {
-        crc = RHcrc_ccitt_update(crc, data[i]);
-        p[index++] = symbols[data[i] >> 4];
-        p[index++] = symbols[data[i] & 0xf];
-    }
-
-    // Append the fcs, 16 bits before encoding (4 6-bit symbols after encoding)
-    // Caution: VW expects the _ones_complement_ of the CCITT CRC-16 as the FCS
-    // VW sends FCS as low byte then hi byte
-    crc = ~crc;
-    p[index++] = symbols[(crc >> 4) & 0xf];
-    p[index++] = symbols[crc & 0xf];
-    p[index++] = symbols[(crc >> 12) & 0xf];
-    p[index++] = symbols[(crc >> 8) & 0xf];
-
-    // Total number of 6-bit symbols to send
-    _txBufLen = index + preambleLen;
-
-    // Start the low level interrupt handler sending symbols
-    setModeTx();
-
-    return true;
-}
-
 // Read the RX data input pin, taking into account platform type and inversion.
 bool RH_INTERRUPT_ATTR RadioDriver::readRx()
 {
@@ -234,24 +155,6 @@ uint8_t RadioDriver::maxMessageLength()
 void RH_INTERRUPT_ATTR esp32_timer_interrupt_handler()
 {
     thisASKDriver->handleTimerInterrupt();
-}
-
-// Convert a 6 bit encoded symbol into its 4 bit decoded equivalent
-uint8_t RH_INTERRUPT_ATTR RadioDriver::symbol_6to4(uint8_t symbol)
-{
-    uint8_t i;
-    uint8_t count;
-
-    // Linear search :-( Could have a 64 byte reverse lookup table?
-    // There is a little speedup here courtesy Ralph Doncaster:
-    // The shortcut works because bit 5 of the symbol is 1 for the last 8
-    // symbols, and it is 0 for the first 8.
-    // So we only have to search half the table
-    for (i = (symbol >> 2) & 8, count = 8; count--; i++)
-        if (symbol == symbols[i])
-            return i;
-
-    return 0; // Not found
 }
 
 

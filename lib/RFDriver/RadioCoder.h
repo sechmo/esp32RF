@@ -33,4 +33,22 @@ public:
     /// \param[in,out] len Pointer to the number of octets available in buf. The number be reset to the actual number of octets copied.
     /// \return true if a valid message was copied to buf
     RH_INTERRUPT_ATTR virtual bool recv(uint8_t *buf, uint8_t *len);
+
+    bool waitPacketSent();
+
+    /// Waits until any previous transmit packet is finished being transmitted with waitPacketSent().
+    /// Then loads a message into the transmitter and starts the transmitter. Note that a message length
+    /// of 0 is NOT permitted.
+    /// \param[in] data Array of data to be sent
+    /// \param[in] len Number of bytes of data to send (> 0)
+    /// \return true if the message length was valid and it was correctly queued for transmit
+    virtual bool send(const uint8_t *data, uint8_t len);
+
+
+protected:
+
+    uint8_t decodeByte(uint16_t receivedBits) override;
+
+    /// Translates a 6 bit symbol to its 4 bit plaintext equivalent
+    RH_INTERRUPT_ATTR uint8_t symbol_6to4(uint8_t symbol);
 };

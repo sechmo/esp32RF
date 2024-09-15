@@ -21,6 +21,8 @@ protected:
     bool bitTransition() override;
     void processBit() override;
 
+    virtual uint8_t decodeByte(uint16_t receivedBits) = 0;
+
     bool RH_INTERRUPT_ATTR moreBitsToTransmit() override;
 
     bool RH_INTERRUPT_ATTR nextBitToTransmit() override;
