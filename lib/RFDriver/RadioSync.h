@@ -23,6 +23,8 @@ protected:
 
     virtual uint8_t decodeByte(uint16_t receivedBits) = 0;
 
+    virtual void receiveBit(bool bit);
+
 
     // Used in the interrupt handlers
     /// Buf is filled but not validated

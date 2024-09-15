@@ -63,20 +63,30 @@ bool RH_INTERRUPT_ATTR RadioSync::bitTransition()
 void RH_INTERRUPT_ATTR RadioSync::processBit()
 {
 
+    _rxPllRamp -= rxRampLen;
     // Add this to the 12th bit of _rxBits, LSB first
     // The last 12 bits are kept
-    _rxBits >>= 1;
 
+    bool bit = _rxIntegrator >= 5;
+    _rxIntegrator = 0; // Clear the integral for the next cycle
+
+
+    receiveBit(bit);
+
+}
+
+void RH_INTERRUPT_ATTR RadioSync::receiveBit(bool bit)
+{
+    _rxBits >>= 1;
     // Check the integrator to see how many samples in this cycle were high.
     // If < 5 out of 8, then its declared a 0 bit, else a 1;
-    if (_rxIntegrator >= 5)
+    if (bit)
         _rxBits |= 0x800;
 
-    _rxPllRamp -= rxRampLen;
-    _rxIntegrator = 0; // Clear the integral for the next cycle
 
     if (_rxActive)
     {
+
         // We have the start symbol and now we are collecting message bits,
         // 6 per symbol, each which has to be decoded to 4 bits
         if (++_rxBitCount >= 12)
