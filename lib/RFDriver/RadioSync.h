@@ -13,7 +13,6 @@ public:
         uint8_t rampAdjust = 9);
 
 protected:
-    void validateRxBuf();
 
     void registerSample(bool rxSample) override;
 
@@ -24,24 +23,10 @@ protected:
 
     virtual uint8_t decodeByte(uint16_t receivedBits) = 0;
 
-    /// TO header in the last received mesasge
-    volatile uint8_t _rxHeaderTo;
-
-    /// FROM header in the last received mesasge
-    volatile uint8_t _rxHeaderFrom;
-
-    /// ID header in the last received mesasge
-    volatile uint8_t _rxHeaderId;
-
-    /// FLAGS header in the last received mesasge
-    volatile uint8_t _rxHeaderFlags;
 
     // Used in the interrupt handlers
     /// Buf is filled but not validated
     volatile bool _rxBufFull;
-
-    /// Buf is full and valid
-    volatile bool _rxBufValid;
 
     /// The incoming message buffer
     uint8_t *_rxBuf;

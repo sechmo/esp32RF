@@ -54,6 +54,7 @@ public:
 
 protected:
 
+    void validateRxBuf();
 
     const uint16_t startSymbol = 0xb38;
 
@@ -87,6 +88,22 @@ protected:
 
     uint8_t decodeByte(uint16_t receivedBits) override;
 
+
+
+    /// TO header in the last received mesasge
+    volatile uint8_t _rxHeaderTo;
+
+    /// FROM header in the last received mesasge
+    volatile uint8_t _rxHeaderFrom;
+
+    /// ID header in the last received mesasge
+    volatile uint8_t _rxHeaderId;
+
+    /// FLAGS header in the last received mesasge
+    volatile uint8_t _rxHeaderFlags;
+
+    /// Buf is full and valid
+    volatile bool _rxBufValid;
     /// Translates a 6 bit symbol to its 4 bit plaintext equivalent
     RH_INTERRUPT_ATTR uint8_t symbol_6to4(uint8_t symbol);
 

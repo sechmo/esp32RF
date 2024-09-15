@@ -15,7 +15,6 @@ RadioSync::RadioSync(
       rampTransition(rxRampLen / 2),
       _rxBad(0),
       _rxGood(0),
-      _rxBufValid(false),
       _rxBufFull(false),
       _rxBufLen(0),
       _rxBuf(new uint8_t[maxPayloadLen]),
@@ -28,32 +27,6 @@ RadioSync::RadioSync(
 
 
 
-// Check whether the latest received message is complete and uncorrupted
-// We should always check the FCS at user level, not interrupt level
-// since it is slow
-void RadioSync::validateRxBuf()
-{
-    uint16_t crc = 0xffff;
-    // The CRC covers the byte count, headers and user data
-    for (uint8_t i = 0; i < _rxBufLen; i++)
-        crc = RHcrc_ccitt_update(crc, _rxBuf[i]);
-    if (crc != 0xf0b8) // CRC when buffer and expected CRC are CRC'd
-    {
-        // Reject and drop the message
-        _rxBad++;
-        _rxBufValid = false;
-        return;
-    }
-
-    // Extract the 4 headers that follow the message length
-    _rxHeaderTo = _rxBuf[1];
-    _rxHeaderFrom = _rxBuf[2];
-    _rxHeaderId = _rxBuf[3];
-    _rxHeaderFlags = _rxBuf[4];
-
-    _rxGood++;
-    _rxBufValid = true;
-}
 
 void RH_INTERRUPT_ATTR RadioSync::registerSample(bool rxSample)
 {
