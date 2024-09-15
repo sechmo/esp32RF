@@ -26,38 +26,6 @@ RadioSync::RadioSync(
 {
 }
 
-// Call this often
-bool RadioSync::available()
-{
-    if (_mode == RHModeTx)
-        return false;
-    setModeRx();
-    if (_rxBufFull)
-    {
-        validateRxBuf();
-        _rxBufFull = false;
-    }
-    return _rxBufValid;
-}
-
-bool RH_INTERRUPT_ATTR RadioSync::recv(uint8_t *buf, uint8_t *len)
-{
-    if (!available())
-        return false;
-
-    if (buf && len)
-    {
-        // Skip the length and 4 headers that are at the beginning of the rxBuf
-        // and drop the trailing 2 bytes of FCS
-        uint8_t message_len = _rxBufLen - headerLen - 3;
-        if (*len > message_len)
-            *len = message_len;
-        memcpy(buf, _rxBuf + headerLen + 1, *len);
-    }
-    _rxBufValid = false; // Got the most recent message, delete it
-                         //    printBuffer("recv:", buf, *len);
-    return true;
-}
 
 
 // Check whether the latest received message is complete and uncorrupted

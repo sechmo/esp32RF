@@ -6,12 +6,6 @@
 #include <RFDriver.h>
 #include <RFCRC.h>
 
-bool RadioDriver::waitPacketSent()
-{
-    while (_mode == RHModeTx)
-        yield(); // Wait for any previous transmit to finish
-    return true;
-}
 
 
 // Michael Cain
@@ -141,6 +135,14 @@ void RadioDriver::setModeTx()
 
         _mode = RHModeTx;
     }
+}
+
+
+bool RadioDriver::waitPacketSent()
+{
+    while (_mode == RHModeTx)
+        yield(); // Wait for any previous transmit to finish
+    return true;
 }
 
 // Caution: this may block

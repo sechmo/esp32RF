@@ -15,9 +15,9 @@ const bool isReceiver = true;
 const int speed = 2000;
 #define USE_OWN 1
 #if (USE_OWN == 1)
-#include <RadioSync.h>
+#include <RadioCoder.h>
 
-RadioSync driver(speed, inputPin, outputPin, 0); // ESP8266 or ESP32: do not use pin 11 or 2
+RadioCoder driver(speed, inputPin, outputPin, 0); // ESP8266 or ESP32: do not use pin 11 or 2
 #else
 
 #include <RH_ASK.h>
