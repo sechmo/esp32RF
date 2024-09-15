@@ -42,10 +42,6 @@ public:
 
     virtual bool waitPacketSent();
 
-    virtual bool waitCAD();
-
-    virtual bool isChannelActive();
-
     /// Initialise the Driver transport hardware and software.
     /// Make sure the Driver is properly configured before calling init().
     /// \return true if initialisation succeeded.
@@ -155,6 +151,9 @@ protected:
 
     /// The transmitter handler function, called a 8 times the bit rate
     void transmitTimer();
+
+    virtual bool moreBitsToTransmit() = 0;
+    virtual bool nextBitToTransmit() = 0;
 
     /// Configure bit rate in bits per second
     uint16_t _speed;

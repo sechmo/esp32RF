@@ -189,3 +189,25 @@ void RH_INTERRUPT_ATTR RadioSync::processBit()
         setModeIdle();
     }
 }
+
+
+bool RH_INTERRUPT_ATTR RadioSync::moreBitsToTransmit() {
+    return _txIndex < _txBufLen;
+}
+
+
+bool RH_INTERRUPT_ATTR RadioSync::nextBitToTransmit() {
+
+    bool nextBit = _txBuf[_txIndex] & (1 << _txBit);
+
+    _txBit++;
+
+    if (_txBit >= 6)
+    {
+        _txBit = 0;
+        _txIndex++;
+    }
+
+
+    return nextBit;
+}

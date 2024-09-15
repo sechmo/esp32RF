@@ -44,6 +44,10 @@ protected:
     bool bitTransition() override;
     void processBit() override;
 
+    bool RH_INTERRUPT_ATTR moreBitsToTransmit() override;
+
+    bool RH_INTERRUPT_ATTR nextBitToTransmit() override;
+
     /// TO header in the last received mesasge
     volatile uint8_t _rxHeaderTo;
 

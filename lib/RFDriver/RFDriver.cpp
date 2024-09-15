@@ -13,32 +13,6 @@ bool RadioDriver::waitPacketSent()
     return true;
 }
 
-bool RadioDriver::waitCAD()
-{
-    if (!_cad_timeout)
-        return true;
-
-    // Wait for any channel activity to finish or timeout
-    // Sophisticated DCF function...
-    // DCF : BackoffTime = random() x aSlotTime
-    // 100 - 1000 ms
-    // 10 sec timeout
-    unsigned long t = millis();
-    while (isChannelActive())
-    {
-        if (millis() - t > _cad_timeout)
-            return false;
-        delay(random(1, 10) * 100); // Should these values be configurable? Macros?
-    }
-
-    return true;
-}
-
-// subclasses are expected to override if CAD is available for that radio
-bool RadioDriver::isChannelActive()
-{
-    return false;
-}
 
 // Michael Cain
 DRAM_ATTR hw_timer_t *timer;
@@ -184,9 +158,6 @@ bool RadioDriver::send(const uint8_t *data, uint8_t len)
     // Wait for transmitter to become available
     waitPacketSent();
 
-    if (!waitCAD())
-        return false; // Check channel activity
-
     // Encode the message length
     crc = RHcrc_ccitt_update(crc, count);
     p[index++] = symbols[count >> 4];
@@ -303,26 +274,18 @@ void RH_INTERRUPT_ATTR RadioDriver::transmitTimer()
         // Symbols are sent LSB first
         // Finished sending the whole message? (after waiting one bit period
         // since the last bit)
-        if (_txIndex >= _txBufLen)
-        {
+        if (moreBitsToTransmit()) {
+            writeTx(nextBitToTransmit());
+        }
+        else {
             setModeIdle();
             _txGood++;
-        }
-        else
-        {
-            writeTx(_txBuf[_txIndex] & (1 << _txBit++));
-            if (_txBit >= 6)
-            {
-                _txBit = 0;
-                _txIndex++;
-            }
         }
     }
 
     if (_txSample >= rxSamples) 
         _txSample = 0;
 }
-
 void RH_INTERRUPT_ATTR RadioDriver::handleTimerInterrupt()
 {
     if (_mode == RHModeRx)
