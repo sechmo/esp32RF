@@ -95,7 +95,7 @@ RadioDriver::RadioDriver(
     // preamble. We will append messages after that. 0x38, 0x2c is the start symbol before
     // 6-bit conversion to startSymbol
     // uint8_t preamble[preambleLen] = {0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x38, 0x2c};
-    uint8_t preamble[preambleLen] = {0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, symbol_6to4(startSymbol & 0x3f), symbol_6to4(startSymbol >> 6)};
+    uint8_t preamble[preambleLen] = {0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, startSymbol & 0x3f, startSymbol >> 6};
     memcpy(_txBuf, preamble, sizeof(preamble));
 }
 
@@ -107,6 +107,15 @@ bool RadioDriver::init()
     pinMode(_txPin, OUTPUT);
     pinMode(_rxPin, INPUT);
     pinMode(_pttPin, OUTPUT);
+
+
+    Serial.print("start symbol");
+    Serial.println(startSymbol, HEX);
+    Serial.print("start symbol 6to4 lower");
+    Serial.println(symbols[startSymbol & 0x3f], HEX);
+    Serial.print("start symbol 6to4 upper");
+    Serial.println(symbols[startSymbol >> 6], HEX);
+
 
     // Ready to go
     setModeIdle();
