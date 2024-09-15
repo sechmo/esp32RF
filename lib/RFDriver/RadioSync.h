@@ -20,6 +20,7 @@ protected:
     void synchronize() override;
     bool bitTransition() override;
     void processBit() override;
+    virtual bool detectedMsgStart(uint16_t receivedBits) = 0;
 
     virtual uint8_t decodeByte(uint16_t receivedBits) = 0;
 

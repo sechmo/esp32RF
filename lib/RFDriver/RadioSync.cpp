@@ -147,7 +147,7 @@ void RH_INTERRUPT_ATTR RadioSync::processBit()
         }
     }
     // Not in a message, see if we have a start symbol
-    else if (_rxBits == startSymbol)
+    else if (detectedMsgStart(_rxBits))
     {
         // Have start symbol, start collecting message
         _rxActive = true;

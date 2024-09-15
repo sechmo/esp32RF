@@ -38,9 +38,7 @@ RadioDriver::RadioDriver(
       _txPin(txPin),
       _pttPin(pttPin),
       _mode(RHModeInitialising),
-      _txGood(0),
-      maxPayloadLen(maxPayloadLen),
-      maxMsgLen(maxPayloadLen - headerLen - 3)
+      _txGood(0)
 {
 }
 
@@ -137,10 +135,6 @@ void RH_INTERRUPT_ATTR RadioDriver::writePtt(bool value)
     digitalWrite(_pttPin, value);
 }
 
-uint8_t RadioDriver::maxMessageLength()
-{
-    return maxMsgLen;
-}
 
 void RH_INTERRUPT_ATTR esp32_timer_interrupt_handler()
 {

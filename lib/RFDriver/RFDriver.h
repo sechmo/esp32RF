@@ -47,11 +47,6 @@ public:
     virtual bool init();
 
 
-    /// Returns the maximum message length
-    /// available in this Driver.
-    /// \return The maximum legal message length
-    virtual uint8_t maxMessageLength();
-
     /// If current mode is Rx or Tx changes it to Idle. If the transmitter or receiver is running,
     /// disables them.
     RH_INTERRUPT_ATTR void setModeIdle();
@@ -72,32 +67,6 @@ public:
     uint16_t speed() { return _speed; }
 
 protected:
-    const uint16_t startSymbol = 0xb38;
-
-    // The length of the headers we add (To, From, Id, Flags)
-    // The headers are inside the payload and are therefore protected by the FCS
-    const uint8_t headerLen = 4;
-
-    // Maximum message length (including the headers, byte count and FCS) we are willing to support
-    // This is pretty arbitrary
-    const uint8_t maxPayloadLen;
-
-
-    /// Outgoing message bits grouped as 6-bit words
-    /// 36 alternating 1/0 bits, followed by 12 bits of start symbol (together called the preamble)
-    /// Followed immediately by the 4-6 bit encoded byte count,
-    /// message buffer and 2 byte FCS
-    /// Each byte from the byte count on is translated into 2x6-bit words
-    /// Caution, each symbol is transmitted LSBit first,
-    /// but each byte is transmitted high nybble first
-    /// This is the number of 6 bit nibbles in the preamble
-    const uint8_t preambleLen = 8;
-
-    // This is the maximum message length that can be supported by this library.
-    // Can be pre-defined to a smaller size (to save SRAM) prior to including this header
-    // Here we allow for 1 byte message length, 4 bytes headers, user data and 2 bytes of FCS
-    // maxPayloadLen - headerLen - 3
-    const uint8_t maxMsgLen;
 
     const uint8_t rxSamples = 8;
 
