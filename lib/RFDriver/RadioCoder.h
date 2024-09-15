@@ -1,6 +1,7 @@
 #include <RadioSync.h>
 
 
+#define RH_BROADCAST_ADDRESS 0xff
 class RadioCoder: public RadioSync
 {
 public:

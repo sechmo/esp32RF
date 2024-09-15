@@ -24,6 +24,8 @@ RadioCoder::RadioCoder(
     : RadioSync(speed, rxPin, txPin, pttPin, maxPayloadLen, rxRampLen, rampAdjust),
       _txBuf(new uint8_t[maxPayloadLen * 2 + preambleLen]),
       _rxBufValid(false),
+      _txHeaderTo(RH_BROADCAST_ADDRESS),
+      _txHeaderFrom(RH_BROADCAST_ADDRESS),
       maxPayloadLen(maxPayloadLen),
       maxMsgLen(maxPayloadLen - headerLen - 3)
 {
