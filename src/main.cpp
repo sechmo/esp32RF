@@ -6,32 +6,50 @@
 // Tested on Arduino Mega, Duemilanova, Uno, Due, Teensy, ESP-12
 
 #include <Arduino.h>
-#include <SPIFFS.h>
+// #include <SPIFFS.h>
 
 #include "AudioTools.h"
-#include  <AudioLibs/AudioSourceSPIFFS.h>
+// #include  <AudioLibs/AudioSourceSPIFFS.h>
+// #include  <AudioLibs/FileLoop.h>
+
 
 
 
 AudioInfo info(44100, 1, 16);
-SineWaveGenerator<int16_t> wave(16000);
-// SquareWaveGenerator<int16_t> wave(16000);
-const char *startFilePath="/";
-const char* ext="wav";
-AudioSourceSPIFFS source(startFilePath, ext);
-WAVDecoder decoder;
+// SineWaveGenerator<int16_t> wave(16000);
+// // SquareWaveGenerator<int16_t> wave(16000);
+// const char *startFilePath="/";
+// const char* ext="wav";
+// AudioSourceSPIFFS source(startFilePath, ext);
+// WAVDecoder decoder;
 
-GeneratedSoundStream<int16_t> sound(wave);
-AnalogAudioStream out;
-StreamCopy copier(out, sound);
 
-AudioPlayer player(source,out, decoder);
-void printMetaData(MetaDataType type, const char* str, int len){
-  Serial.print("==> ");
-  Serial.print(toStr(type));
-  Serial.print(": ");
-  Serial.println(str);
-}
+// FileLoop floop;
+// EncodedAudioStream decoded(&floop, new WAVDecoder());
+
+// GeneratedSoundStream<int16_t> sound(wave);
+
+AudioWAVServer server("_", "_", 3333);
+AnalogAudioStream in;
+// CsvOutput<int16_t> csv(Serial);
+// EncodedAudioStream wav(&csv, new WAVEncoder());
+
+ConverterFillLeftAndRight<int16_t> filler(LeftIsEmpty); // fill both channels - or change to RightIsEmpty
+
+
+// AnalogAudioStream out;
+// StreamCopy copier(out, sound);
+// StreamCopy copier(out, floop);
+// StreamCopy copier(wav, in);
+
+
+// AudioPlayer player(source,out, decoder);
+// void printMetaData(MetaDataType type, const char* str, int len){
+//   Serial.print("==> ");
+//   Serial.print(toStr(type));
+//   Serial.print(": ");
+//   Serial.println(str);
+// }
 
 
 
@@ -78,30 +96,48 @@ void setup()
     #endif
 
 
-    SPIFFS.begin();
+    // SPIFFS.begin();
+
+    // File f = SPIFFS.open("/sample.wav", "r");
+
+    // floop.setFile(f);
+    // floop.begin();
+
+    // decoded.begin();
+
 
 
 
 
     // AudioLogger::instance().begin(Serial, AudioLogger::Info);
 
-    auto config = out.defaultConfig(TX_MODE);
-    config.copyFrom(info);
-    out.begin(config);
 
 
-    wave.begin(info, N_B4);
+    // auto outConfig = out.defaultConfig(TX_MODE);
+    // outConfig.copyFrom(info);
+    // out.begin(outConfig);
+
+
+    auto inConfig = in.defaultConfig(RX_MODE);
+    inConfig.copyFrom(info);
+    in.begin(inConfig);
+
+    // wav.begin();
+
+    // wave.begin(info, N_B4);
 
     // source.setFileFilter("*.wav");
     // player.setMetadataCallback(printMetaData);
 
     // player.begin();
 
-    copier.begin();
+    // copier.begin();
+
+    server.begin(in, inConfig, nullptr);
 
 
         
-    Serial.println("setup done");
+    // Serial.println("setup done");
 }
 #if (USE_RADIO == 1)
 void loopReceiver()
@@ -179,7 +215,8 @@ void loop()
     // player.copy();
 
 
-    copier.copy();
+    // copier.copy();
+    server.copy();
 
 
 }
