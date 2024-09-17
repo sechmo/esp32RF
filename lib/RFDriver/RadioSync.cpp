@@ -13,6 +13,7 @@ RadioSync::RadioSync(
       _rxIntegrator(0),
       rxRampLen(rxRampLen),
       rampTransition(rxRampLen / 2),
+      _rxCount(0),
       _rxBad(0),
       _rxGood(0),
       _rxBufFull(false),

@@ -10,7 +10,7 @@ class RadioStream : public AudioStream {
 
 public: 
     RadioStream() {
-        driver = new RadioCoder(2000, GPIO_NUM_33, GPIO_NUM_19);
+        driver = new RadioCoder(2000, GPIO_NUM_33, GPIO_NUM_25);
     }
 
     bool begin() {
@@ -59,7 +59,16 @@ public:
 
     int available() override {
         TRACEI();
-        return driver->availableLength();
+
+        // LOGI("Available: %d", driver->available());
+        // LOGI("Ramp: %d", driver->getRamp());
+        // return driver->availableLength();
+
+
+        bool hasMsg  = driver->recv(buf, &bufLen) ;
+
+
+        return hasMsg ? bufLen: 0;
     }
 
     size_t readBytes(uint8_t* data, size_t len) override {
@@ -67,17 +76,21 @@ public:
 
 
 
-        if (!driver->available()) {
-            return 0;
-        }
+        // if (!driver->available()) {
+        //     return 0;
+        // }
 
 
-        uint8_t len8 = len < 0 ? 0 : (len > 255 ? 255 : len);
+        uint8_t len8 = len < 0 ? 0 : (len > bufLen ? bufLen : len);
 
-        if (!driver->recv(data, &len8)) {
-            LOGE("Failed to receive message");
-            return 0;
-        }
+        memcpy(data, buf, len8);
+
+        // if (!driver->recv(data, &len8)) {
+        //     LOGE("Failed to receive message");
+        //     return 0;
+        // }
+
+        bufLen = driver->maxMessageLength();
 
         return len8;
     }
@@ -86,7 +99,7 @@ public:
 protected:
 
     RadioCoder* driver;
-    int bufLen;
+    uint8_t bufLen;
     uint8_t* buf;
 
 };

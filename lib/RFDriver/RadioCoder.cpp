@@ -47,8 +47,14 @@ uint8_t RadioCoder::maxMessageLength()
 // Call this often
 bool RadioCoder::available()
 {
+
     if (_mode == RHModeTx)
         return false;
+
+    // Serial.println("available");
+    // Serial.printf("buf full %d \n",_rxBufFull);
+    // Serial.printf("ramp %d \n",_rxPllRamp);
+    // Serial.printf("count %d \n",_rxCount);
     setModeRx();
     if (_rxBufFull)
     {
@@ -60,6 +66,11 @@ bool RadioCoder::available()
 
 size_t RadioCoder::availableLength()
 {
+    if (_mode == RHModeTx)
+        return 0;
+
+    setModeRx();
+
     if (_rxBufValid)
     {
         return _rxBufLen - headerLen - 3;

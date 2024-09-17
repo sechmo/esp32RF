@@ -12,6 +12,8 @@ public:
         uint8_t rxRampLen = 160,
         uint8_t rampAdjust = 9);
 
+    uint8_t getRamp() { return _rxPllRamp; }
+
 protected:
 
     void registerSample(bool rxSample) override;
