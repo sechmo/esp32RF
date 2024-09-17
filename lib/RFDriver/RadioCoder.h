@@ -30,6 +30,10 @@ public:
     /// \return true if a new, complete, error-free uncollected message is available to be retreived by recv()
     virtual bool available();
 
+    // returns the len of the available message if available
+    size_t availableLength();
+
+    bool availableToTransmit();
 
     /// Turns the receiver on if it not already on.
     /// If there is a valid message available, copy it to buf and return true

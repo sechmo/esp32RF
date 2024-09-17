@@ -58,6 +58,20 @@ bool RadioCoder::available()
     return _rxBufValid;
 }
 
+size_t RadioCoder::availableLength()
+{
+    if (_rxBufValid)
+    {
+        return _rxBufLen - headerLen - 3;
+    }
+    return 0;
+}
+
+bool RadioCoder::availableToTransmit()
+{
+    return _mode == RHModeTx || _mode == RHModeIdle;
+}
+
 
 // Check whether the latest received message is complete and uncorrupted
 // We should always check the FCS at user level, not interrupt level

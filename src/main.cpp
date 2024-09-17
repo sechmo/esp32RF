@@ -11,13 +11,14 @@
 #include "AudioTools.h"
 // #include  <AudioLibs/AudioSourceSPIFFS.h>
 // #include  <AudioLibs/FileLoop.h>
+#include "RadioStream.h"
 
 
 
 
-AudioInfo info(44100, 1, 16);
+AudioInfo info(2000, 1, 16);
 // SineWaveGenerator<int16_t> wave(16000);
-// // SquareWaveGenerator<int16_t> wave(16000);
+SquareWaveGenerator<int16_t> wave(16000);
 // const char *startFilePath="/";
 // const char* ext="wav";
 // AudioSourceSPIFFS source(startFilePath, ext);
@@ -27,14 +28,18 @@ AudioInfo info(44100, 1, 16);
 // FileLoop floop;
 // EncodedAudioStream decoded(&floop, new WAVDecoder());
 
-// GeneratedSoundStream<int16_t> sound(wave);
+GeneratedSoundStream<int16_t> sound(wave);
 
-AudioWAVServer server("_", "_", 3333);
-AnalogAudioStream in;
+// AudioWAVServer server("_", "_", 3333);
+// AnalogAudioStream in;
+RadioStream radio;
+
+StreamCopy copier(radio, sound);
+
 // CsvOutput<int16_t> csv(Serial);
 // EncodedAudioStream wav(&csv, new WAVEncoder());
 
-ConverterFillLeftAndRight<int16_t> filler(LeftIsEmpty); // fill both channels - or change to RightIsEmpty
+// ConverterFillLeftAndRight<int16_t> filler(LeftIsEmpty); // fill both channels - or change to RightIsEmpty
 
 
 // AnalogAudioStream out;
@@ -104,12 +109,26 @@ void setup()
     // floop.begin();
 
     // decoded.begin();
+    AudioLogger::instance().begin(Serial, AudioLogger::Debug);
+
+
+    if (!radio.begin())
+    {
+        Serial.println("radio begin failed");
+    }
+
+    sound.begin(info);
+    wave.begin(info, N_B4);
+
+    copier.begin(); 
 
 
 
 
 
-    // AudioLogger::instance().begin(Serial, AudioLogger::Info);
+
+
+
 
 
 
@@ -118,9 +137,9 @@ void setup()
     // out.begin(outConfig);
 
 
-    auto inConfig = in.defaultConfig(RX_MODE);
-    inConfig.copyFrom(info);
-    in.begin(inConfig);
+    // auto inConfig = in.defaultConfig(RX_MODE);
+    // inConfig.copyFrom(info);
+    // in.begin(inConfig);
 
     // wav.begin();
 
@@ -133,7 +152,7 @@ void setup()
 
     // copier.begin();
 
-    server.begin(in, inConfig, nullptr);
+    // server.begin(in, inConfig, nullptr);
 
 
         
@@ -216,7 +235,8 @@ void loop()
 
 
     // copier.copy();
-    server.copy();
+    // server.copy();
+    copier.copy();
 
 
 }
