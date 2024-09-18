@@ -46,6 +46,20 @@ void setup()
 
 }
 
+void setPins(uint8_t ref)
+{
+    digitalWrite(ledPin0, ref & 0x01);
+    digitalWrite(ledPin1, ref & 0x02);
+    digitalWrite(ledPin2, ref & 0x04);
+    digitalWrite(ledPin3, ref & 0x08);
+
+}
+
+uint8_t randomPinsState()
+{
+    return random(0, 16);
+}
+
 
 void loopReceiver()
 {
@@ -61,7 +75,7 @@ void loopReceiver()
         // Serial.println();
         for (int i = 0; i < rxBufLen; i++)
         {
-            Serial.print(rxBuf[i]);
+            Serial.print((char)rxBuf[i]);
         }
         Serial.println();
 
@@ -69,6 +83,7 @@ void loopReceiver()
         delay(50);
         digitalWrite(ledInternal, LOW);
         delay(50);
+        setPins(rxBuf[0]);
         rxBufLen = driver.maxMessageLength(); // Reset the length for the next message
     }
     // int16_t *data = (int16_t *)rxBuf;
@@ -171,12 +186,18 @@ void loopReceiver()
 void loopTransmitter()
 {
 
-    const char* data = "Hello, world!";
+    uint8_t data[1];
 
-    driver.send((uint8_t*)data, strlen(data));
+    data[0] = randomPinsState();
+
+    setPins(data[0]);
+
+
+    driver.send(data, 1);
     driver.waitPacketSent();
 
     Serial.println("Sent");
+    delay(1000);
 }
 void loop()
 {
